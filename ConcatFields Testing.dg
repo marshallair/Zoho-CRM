@@ -1,0 +1,18 @@
+Testing protocol--------------------------------------------*/
+if(sModule.isNull())
+{
+	sModule = "Trip_Components";
+	ID = 6406575000000654343;
+	sFieldList = "End_Title{,}END:{$}{nl}{,}{dt}End_Time{,}Time: {f$}MMM dd, YYYY hh:mm{\f$}{,}End_Time_Zone{,} ({$}){nl}{,}End_Address{,}{$}{nl}{,}End_Address_2,{$}{nl}{,}End_Address_3,{$}{nl}{,}End_City{,}{$}{nl}{,}End_US_State{,}{$}{nl}{,}End_Province{,}{$}{nl}{,}End_Country_list{,}{$}{nl}{,}End_Address_Text{,}Notes:{nl}{$}{nl}";
+	Delim = null;
+	sLine = "\n";
+	sFinsert = null;
+	sNinsert = null;
+	sLinsert = null;
+	bIgnoreBlanks = null;
+	sBlanks = null;
+	//mimic an incoming boolean parameter 
+}
+// end testing -------------------------------------------------
+//
+//
