@@ -1,0 +1,117 @@
+/*  This Zoho CRM Deluge (doesn't work in Creator) function does it's level best to figure out what type of field it's been given.
+   	When LIST is returned, it could just be a STRING, but the format looks like a PickList or something of that nature due to the commas. Multi Pick-lists will return LIST, for example.
+
+	The return values are:
+		NULL (empty)
+		BOOLEAN (checkbox or other field that returns "true"" or "false")
+		MAP
+		NUMBER (integer, currency, decimal, percent)
+		DATETIME
+		DATE
+		STRING
+		UNKNOWN (catch all for everything else)
+
+String FieldType(String v) {...}
+*/
+if(v == null)
+{
+	return "NULL";
+}
+try 
+{
+	if(v == "true" || v == "false")
+	{
+		return "BOOLEAN";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	m = v.toMap();
+	if(m != null)
+	{
+		return "MAP";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isNumber(v))
+	{
+		return "NUMBER";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(!isnull(v.toDateTime("yyyy-MM-dd'T'HH:mm:ss")))
+	{
+		return "DATETIME";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isDate(v))
+	{
+		return "DATE";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isText(v))
+	{
+		return "STRING";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isNull(v))
+	{
+		return "NULL";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(v.isEmpty())
+	{
+		try 
+		{
+			v.add(1);
+			return "LIST";
+		}
+		catch (e)
+		{
+		}
+		return "MAP";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	l = v.toList(",");
+	return "LIST";
+}
+catch (e)
+{
+}
+return "UNKNOWN";

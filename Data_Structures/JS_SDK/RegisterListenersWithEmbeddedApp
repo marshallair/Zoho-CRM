@@ -1,0 +1,43 @@
+ZOHO.embeddedApp.on("DialerActive",function(){
+	console.log("Dialer Activated");
+});
+
+ZOHO.embeddedApp.on("Dial",function(data){
+	console.log("Number Dialed");
+});
+
+ZOHO.embeddedApp.on("Notify", function (data) {
+	console.log("Client Script flyout notification", data);
+});
+
+ZOHO.embeddedApp.on("NotifyAndWait", function (data) {
+	console.log("Client Script synchronous flyout notification", data);
+	ZDK.Client.sendResponse(data.id, { choice: 'mail', value: 'example@zoho.com' });
+});
+
+ZOHO.embeddedApp.on("PageLoad",function(data){
+	console.log(data);
+});
+
+// Prints
+-----------------------------
+RelatedList
+-----------------------------
+{
+  "Entity": "Leads",
+  "EntityId": "3000000032096"
+}
+-----------------------------
+Buttons
+-----------------------------
+{
+  "EntityId": [
+    "3000000040011",
+    "3000000032101",
+    "3000000032096",
+    "3000000032091",
+    "3000000032009"
+  ],
+  "Entity": "Leads",
+  "ButtonPosition": "ListView"
+}

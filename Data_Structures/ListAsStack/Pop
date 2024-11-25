@@ -1,0 +1,4 @@
+// String Pop(string S) - both argument and returned value are a list string
+sl=S.toList();
+sl.remove(sl.size());
+return sl;

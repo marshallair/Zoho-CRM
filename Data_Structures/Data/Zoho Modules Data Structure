@@ -1,0 +1,245 @@
+//Contact structure
+{
+    "$canvas_id":null,  //null values have no quotes
+    "$currency_symbol":"$",
+    "$editable":true,   //booleans have no quotes
+    "$field_states":null,
+    "$locked_for_me":false,
+    "$orchestration":false,
+    "$process_flow":false,
+    "$review":null,
+    "$state":"save",
+    "$zia_owner_assignment":"owner_recommendation_unavailable",
+    "Account_Name":null,
+    "Assistant":null,
+    "Asst_Phone":null,
+    "Average_Time_Spent_Minutes":null,
+    "Contact_Type":["Traveler Contact","Traveler","Companion","Referrer","OTHER"], //multi-select pull down - multiples separated with commas
+    "Created_Time":"2024-09-10T12:56:20-05:00",  /date time format is yyyy-mm-ddThh:mm:ss-kk:jj where -kk:jj is Grenwich offset for time zone
+    "Date_of_Birth":null,
+    "Days_Visited":null,
+    "Department":null,
+    "Description":null,
+    "Email_Opt_Out":false,
+    "Email":null,
+    "First_Name":"CONTACT",
+    "First_Visited_Time":null,
+    "First_Visited_URL":null,
+    "Full_Name":"CONTACT TEST",
+    "Gender":null,
+    "Home_Phone":null,
+    "id":"6406575000000655814", /ID is text but is long integer as a parameter within Deluge, therefore .toLong() use
+    "Last_Activity_Time":"2024-09-10T13:16:12-05:00",
+    "Last_Name":"TEST",
+    "Last_Visited_Time":null,
+    "Mailing_Address_2":null,
+    "Mailing_Address_3":null,
+    "Mailing_City":null,
+    "Mailing_Country_list":null,
+    "Mailing_Country":null,
+    "Mailing_State":null,
+    "Mailing_Street":null,
+    "Mailing_Zip":null,
+    "Mobile":null,
+    "Modified_Time":"2024-09-10T12:56:20-05:00",
+    "Number_Of_Chats":null,
+    "Other_Address_2":null,
+    "Other_Address_3":null,
+    "Other_City":null,
+    "Other_Country":null,
+    "Other_Phone":null,
+    "Other_State":null,
+    "Other_Street":null,
+    "Other_Zip":null,
+    "Phone":null,
+    "Preferred_Callback_Time":null,
+    "Record_Image":null,
+    "Referred_by":null,
+    "Reporting_To":null,
+    "Salutation":null,
+    "Secondary_Email":null,
+    "Skype_ID":null,
+    "Title":null,
+    "Trip":null,
+    "Twitter":null,
+    "Unsubscribed_Mode":null,
+    "Unsubscribed_Time":null,
+    "Vendor_Name":null,
+    "Visitor_Score":null,
+
+    "$approved":true, 
+
+    "$approval": //map
+    {
+        "delegate":false,
+        "approve":false,
+        "reject":false,
+        "resubmit":false
+    },
+
+    "$review_process": //map
+    {
+        "approve":false,
+        "reject":false,
+        "resubmit":false
+    },
+
+    "Owner":  //standard user map even though email and name could be retrieved by ID
+    {
+        "name":"Melisa Spradlin",
+        "id":"6406575000000479001",
+        "email":"melisa@gomotravel.com"
+    },
+    
+    "Created_By":
+    {
+        "name":"Melisa Spradlin",
+        "id":"6406575000000479001",
+        "email":"melisa@gomotravel.com"
+    },
+
+    "Modified_By":
+    {
+        "name":"Melisa Spradlin",
+        "id":"6406575000000479001",
+        "email":"melisa@gomotravel.com"
+    },
+
+    "Layout":  //standard related record map
+    {
+        "name":"Standard",
+        "id":"6406575000000091033"
+    }
+
+
+}
+
+//Deal Structure (Trips)
+{
+    "$approval_state":"approved",
+    "$approved":true,
+    "$canvas_id":null,
+    "$currency_symbol":"$",
+    "$editable":true,
+    "$field_states":null,
+    "$in_merge":false,
+    "$locked_for_me":false,
+    "$orchestration":false,
+    "$process_flow":false,
+    "$review":null,
+    "$state":"save",
+    "$zia_owner_assignment":null,
+    "Amount":0,
+    "Begin_Date":"2024-09-03",
+    "Campaign_Source":null,
+    "Closing_Date":"2024-09-30",
+    "Created_Time":"2024-09-09T19:34:41-05:00",
+    "Deal_Name":"Manfred Henley",
+    "Description":"Trip to visit grandchildren in Austin, TX in Sep",
+    "Domestic_In_l":"Domestic",
+    "End_Date":"2024-09-04",
+    "Expected_Revenue":0,
+    "id":"6406575000000590739",
+    "Last_Activity_Date":null,
+    "Last_Activity_Time":"2024-09-10T16:18:56-05:00",
+    "Last_Activity":null,
+    "Lead_Conversion_Time":0,
+    "Lead_Source":null,
+    "Locked__s":false,
+    "Modified_Time":"2024-09-10T16:18:56-05:00",
+    "Next_Activity_Date":null,
+    "Next_Activity":null,
+    "Next_Step":null,
+    "Overall_Sales_Duration":21,
+    "Probability":40, //number
+    "Reason_For_Loss__s":null,
+    "Sales_Cycle_Duration":21,
+    "Stage":"10 Verbal Estimate",
+    "Type":null,
+
+    // Tags
+    "Tag":
+    [
+        {
+            "name":"4 PMT_RCVD",    
+            "id":"6406575000000634776"
+        }   
+    ]
+    
+    // Multiselect lookups don't have their data stored in a linking table that is inaccessible through the GetRecordFromID() function or the API (not listed).
+    // Multiselects and related records are available by using the Deluge GetRelatedRecords() function.
+    "Travelers":"ADDL TRAVELER TEST", // Multiselect lookup - WEIRD. Need to research this.
+    "Trip_Components":"__TRAV_LODGE, __COMP_LODGE.. & More", //multiselect lookup
+
+    //User maps
+    "Owner":
+    {
+        "name":"Melisa Spradlin",
+        "id":"6406575000000479001",
+        "email":"melisa@gomotravel.com"
+    },
+    
+    "Created_By":
+    {
+        "name":"Melisa Spradlin",
+        "id":"6406575000000479001",
+        "email":"melisa@gomotravel.com"
+    },
+
+    "Modified_By":
+    {
+        "name":"Melisa Spradlin",
+        "id":"6406575000000479001",
+        "email":"melisa@gomotravel.com"
+    },
+    
+    //Related Modules
+    "Referrer1":
+    {
+        "name":"Carville Henley",
+        "id":"6406575000000564026"
+    },
+
+    // Other maps
+    "$approval":
+    {
+        "delegate":false,
+        "approve":false,
+        "reject":false,
+        "resubmit":false
+    },
+
+    "$review_process":
+    {
+        "approve":false,
+        "reject":false,
+        "resubmit":false
+    },
+     
+    "Companion":
+    {       
+        "name":"COMPANION TEST",
+        "id":"6406575000000655819"
+    },
+    
+    "Account_Name":
+    {
+        "name":"Beza Performance",
+        "id":"6406575000000564023"
+    },
+
+
+    "Contact_Name":
+    {
+        "name":"TRAVELER TEST",
+        "id":"6406575000000655804"
+    },
+
+    "Traveler":
+    {
+        "name":"TRAVELER TEST",
+        "id":"6406575000000655804"
+    },
+
+
+}

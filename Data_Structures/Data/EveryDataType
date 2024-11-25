@@ -1,0 +1,65 @@
+//EveryDataType custom module from CRM Dev environment
+//
+// Using the following code, we get the following output:
+ID=4522002000000138720;
+r=zoho.crm.getRecordById("EveryDataTypes", ID).toMap();
+//info r;
+for each fld in r.keys()
+{
+	info fld+": "+r.get(fld);
+}
+return r;
+//
+//
+//OUTPUT
+Checkbox_1: true
+Currency1: 12345678901234.56
+Decimal_1: 12345678901234.56
+Single_Line_1: adfdaf
+Multi_Line1: afddfadsf asf asf asdf adf asf asdf adsf asdfdf dsf
+Date_Time1: 2024-10-19T19:00:00-05:00
+Date1: 2024-10-19
+Phone1: 3143788663
+Number1: 123456789
+URL_1: bezaperformance.com
+Email_Opt_Out: false
+Long_Integer_1: 123456789012345678
+Pick_List1: Option 1
+Multi_Select1: Option 1,Option 3
+Percent_1: 120
+Auto_Number1: 1
+Lookup_1: {"name":"Marshall Henley","id":"4522002000000138710"}
+Multi_Select_Lookup_1: Marshall Henley, Jeff Bailey
+Formula_Boolean: false
+User_Single1: {"name":"Marshall Henley","id":"4522002000000129001"}
+File_Upload_1: null
+// system fields, visible
+Name: TEST1
+Email: marshallhenley@bezaholdings.com
+Owner: {"name":"Marshall Henley","id":"4522002000000129001","email":"marshallhenley@bezaholdings.com"}
+Created_By: {"name":"Marshall Henley","id":"4522002000000129001","email":"marshallhenley@bezaholdings.com"}
+Tag: {"name":"TAG1","id":"4522002000000138858"},{"name":"TAG2","id":"4522002000000138859"},{"name":"TAG3","id":"4522002000000138860"}
+Secondary_Email: null
+Last_Activity_Time: 2024-10-12T19:48:18-05:00
+Created_Time: 2024-10-12T19:46:59-05:00
+Modified_Time: 2024-10-12T19:48:18-05:00
+Modified_By: {"name":"Marshall Henley","id":"4522002000000129001","email":"marshallhenley@bezaholdings.com"}
+//
+// hidden system fields
+id: 4522002000000138720
+Record_Image: null - there is an image attached to this record, so somewhere this is tracked separate from the record structure available in Deluge getRecordById()
+$currency_symbol: $
+$approval: {"delegate":false,"approve":false,"reject":false,"resubmit":false}
+$approved: true
+Unsubscribed_Time: null
+Unsubscribed_Mode: null
+$editable: true
+$orchestration: false
+$in_merge: false
+$zia_owner_assignment: owner_recommendation_unavailable
+$approval_state: approved
+$review_process: {"approve":false,"reject":false,"resubmit":false}
+$field_states: null
+$state: save
+$process_flow: false
+$review: null

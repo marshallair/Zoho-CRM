@@ -1,0 +1,24 @@
+//WHILE loop
+condition = true;
+n=1000;
+looper = Leftpad("1",n).replaceAll(" ","1,").toList();
+/*THIS IS FUNCTIONALLY A WHILE BUT ONLY IF looper contains at least as many items as you need to evaluate your series. It maxes out with n=66665. It may max out at a lower number with more code. and returns the following error:
+	Failed to execute function
+	The limit of Statement has reached its maximum 200000 Line Number:13
+*/
+n = 1;
+for each index i in looper
+{
+	//your code to set condition = need a logical expression, or just use it in place of the condition variable
+	condition = true; 
+	if(condition)
+	{
+		//this does NOT work: looper.add(1);
+		//your code
+		info i;
+	}
+	else
+	{
+		break;
+	}
+}

@@ -1,0 +1,128 @@
+/*  This Zoho CRM Deluge (doesn't work in Creator) function does it's level best to figure out what type of VARIABLE it's been given. To do so, the variable must be passed in a list, using braces, like this: VarType{{x}}
+
+	The return values are:
+		NULL (empty)
+		BOOLEAN (checkbox or other field that returns "true"" or "false")
+		LIST
+		NULLLIST
+		MAP
+		NUMBER (integer, currency, decimal, percent)
+		DATETIME
+		//DATE is just a datetime with 00:00:00 for time
+		STRING
+		UNKNOWN (catch all for everything else)
+
+String VaType(String v) {...} - again, v must be a variable passed in brackets, so v might look like {x} or even a literal like {{mapitem1:"K",mapitem2:"P"}} or {x.toList{}}
+*/
+//
+var = var.toList();
+try 
+{
+	v = var.get(0);
+}
+catch (e)
+{
+	return "NULL";
+}
+if(v == null)
+{
+	return "NULL";
+}
+try 
+{
+	if(v == "true" || v == "false")
+	{
+		return "BOOLEAN";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	m = v.toMap();
+	if(m != null)
+	{
+		return "MAP";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isNumber(v))
+	{
+		return "NUMBER";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(!isnull(v.toDateTime("yyyy-MM-dd'T'HH:mm:ss")))
+	{
+		return "DATETIME";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isDate(v))
+	{
+		return "DATETIME";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isText(v))
+	{
+		return "STRING";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(isNull(v))
+	{
+		return "NULL";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	if(v.isEmpty())
+	{
+		try 
+		{
+			v.add(1);
+			return "LIST";
+		}
+		catch (e)
+		{
+		}
+		return "MAP";
+	}
+}
+catch (e)
+{
+}
+try 
+{
+	l = v.toList(",");
+	return "LIST";
+}
+catch (e)
+{
+}
+return "UNKNOWN";

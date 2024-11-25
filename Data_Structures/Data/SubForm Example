@@ -1,0 +1,55 @@
+//"Additional Details" is key:
+
+{
+"$in_merge":false,
+"$field_states":null,
+"Created_Time":"2024-09-18T04:35:15-05:00",
+"Amount":null,
+"Parent_Id":
+    {"name":"Flight to NOLA","id":"6406575000000654343"},
+"id":"6406575000000883345",
+"Info":"3382",
+"Detail":"Flight No"
+}
+
+,
+
+{
+    "$in_merge":false,
+"$field_states":null,
+"Created_Time":"2024-09-18T04:35:15-05:00",
+"Amount":null,
+"Parent_Id":
+    {"name":"Flight to NOLA","id":"6406575000000654343"},
+"id":"6406575000000883346",
+"Info":"32A",
+"Detail":"Traveler seat"
+}
+
+,
+
+{
+    "$in_merge":false,
+"$field_states":null,
+"Created_Time":"2024-09-18T04:35:15-05:00",
+"Amount":null,
+"Parent_Id":
+    {"name":"Flight to NOLA","id":"6406575000000654343"},
+"id":"6406575000000883347",
+"Info":"32B",
+"Detail":"Companion seat"
+}
+
+,
+
+{
+    "$in_merge":false,
+"$field_states":null,
+"Created_Time":"2024-09-18T04:35:15-05:00",
+"Amount":null,
+"Parent_Id":
+    {"name":"Flight to NOLA","id":"6406575000000654343"},
+"id":"6406575000000883348",
+"Info":"YES",
+"Detail":"Preboard"
+}
