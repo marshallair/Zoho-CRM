@@ -1,0 +1,45 @@
+/*	Copyright (c) 2023, 2024 by Beza Holdings LLC.
+	Beza Holdings LLC (BEZA) does business as Beza Performance (bezaperformance.com).
+	This code may be used or altered by clients (USERS) of BEZA who have contracted with BEZA in writing for a project using Zoho applications,
+	including Zoho One and Zoho CRM, and may only used by those clients for their own solutions within Zoho applications.
+	No sale or use rights are granted for other purposes or USERS.
+	
+CopyFieldsByMap() is a useful function for copying data from one module to another, as long as the field names and record IDs are known.
+	It is frequently used in buttons or Workflow Rules that require need to update data in the current module.
+	It returns the results of the write to the target records as a string. Frequently, a record has already been looked up in the calling function,
+	so that record's contents can be passed instead of a FromID. The FromMod and FromID are therefore ignored if a FromData map is passed.
+	
+	Format:
+	<stringvar>=
+	CopyFieldsByMap(
+		FromMod as String,			the Module to be copied from
+		FromID as Int,				the ID of the record in the module to be copied from
+		FromData as String,			a Map of the data pulled from the From record using .getRecordFromID() or another function (ignore FromMod and FromID)
+		ToMod as String,			the Module to be copied to
+		ToID as Int,				the ID of the record to be copied to
+		FieldMap as String			a list of field pairs, separated by commas, with each pair separated by a comma
+		)
+*/
+if(isNull(FromData))
+{
+	FromData = zoho.crm.getRecordById(FromMod,FromID);
+}
+FL = FieldMap.toList(",");
+m = Map();
+Odd = true;
+for each  fName in FL
+{
+	if(Odd)
+	{
+		f1 = fName;
+		Odd = false;
+	}
+	else
+	{
+		f2 = fName;
+		Odd = true;
+	}
+	m.put(f2,FromData.get(f1));
+}
+s = zoho.crm.updateRecord(ToMod,ToID,m);
+return s;

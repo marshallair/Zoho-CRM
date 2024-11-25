@@ -1,0 +1,115 @@
+/*	Copyright (c) 2023, 2024 by Beza Holdings LLC.
+	Beza Holdings LLC (BEZA) does business as Beza Performance (bezaperformance.com).
+	This code may be used or altered by BEZA clients who have contracted with BEZA in writing for a project using Zoho applications,
+	such as Zoho One or Zoho CRM, and may only used by those clients for their own solutions using the Zoho applications.
+	No sale or use rights for other entities is granted.
+
+FieldMerge() is atandalone function that retrieves a list of fields and embeds them in a string. Blanks can be surpressed or allowed.
+
+	Format:
+    <stringvar>=
+	ConcatFields(
+		sModule as string,							the name of the module to retrieve
+		ID as int,									the ID of the record to be retrieved from sModule
+		sMergeText as string,						see below
+        sLine as String="<br>"                      the default line feed code to use for inserts with a line feed
+		sFinsert as String="|$|",					the formatting string to insert field data
+        sLinsert as String="|$wl|"                   the formatting string to insert field data with a line feed after the field
+		bIgnoreBlanks as bool=TRUE)					ignore formatting for a field that is blank = "" or null
+
+sFieldList is in itself a string parameter list, as follows:
+	The sFieldList parameter assumes substrings as parameters in pairs with "|,|" as the default delimiter,
+	namely: FieldName1|,|Format2|,|FieldName2|,|Format2|,|...FieldName_n|,|Format_n
+			
+    In essence, the Format portion is treated like a literal string with inserts for
+		Field Value (usually "|$|" but set by sFInsert).
+		Field Label Name with underscores replaced by spaces (usually "|_|" but set by sNinsert).
+		Line breaks (usually "|nl|" but set by sLinsert).
+			Linebreaks could also be used for a third generic insert that doesn't break lines.
+			The default line break is set by sLine, which itself defaults to "<br>",
+			 which is the RichText line break, but we could use "\n" for simple text multiline fields, or any other string.
+
+    The sFieldList internal delimiter is set by sDelim, which defaults to "|,|" to avoid the likelihood that it will be used in a parameter
+    passed accidentally, but a simple comma will suffice if you are guaranteed not to be using a comma in any of the data.
+
+	A few examples of sFieldList values and their outputs:
+		SFieldList "Name|,||_|: |$||nl||,|Date_of_Birth|,|Born on the date of |$||nl||nl|"
+		 when used for two normal records and a third record without a name (blank ignored) as in report might look like:
+			
+			Name: Marshall Henley
+			Born on the date of 3/18/1970
+
+			Name: Amy Henley
+			Born on the date of 2/21/1972
+
+			Born on the date of 12/25/2000
+
+			---
+			... with the actual string returned looking like this:
+			Name: Marshall Henley<br>Born on the date of 3/18/1970<br><br>Name: Amy Henley<br>Born on the date of 2/21/1972<br><br>Born on the date of 12/25/2000
+	While arcane to look at, the power of these strings is they can be stored in text fields in subForms, for example,
+	 and used to aggregate subForm data with powerful formatting, including RTF codes.
+
+Testing protocol--------------------------------------------*/
+if(sTable = "mm")
+{
+	sTable = "Trip_Components";
+	ID = 6406575000000654343;
+	sFieldList = "null,null,Start_Address,null,null,Start_Address_2,null,null,Start_City";	
+	sDelim = null;
+	sLine = null;
+	sFinsert=null;
+	sNinsert=null;
+	sLinsert=null;
+	bIgnoreBlanks = null;
+	//mimic an incoming boolean parameter 
+}
+// end testing -------------------------------------------------
+//
+//
+//default values
+sDelim = if(ifNull(sDelim,"|,|") == "","|,|",sDelim);
+sLabel = if(ifNull(sLabel,"|,|") == "","|,|",sLabel);
+sLine = if(ifNull(sLine,"<br>") == "","<br>",sLine);
+sFinsert = if(ifNull(sFinsert,"|$|") == "","|$|",sFinsert);
+sNinsert = if(ifNull(sNinsert,"|_|") == "","|_|",sNinsert);
+sLinsert = if(ifNull(sLinsert,"|nl|") == "","|nl|",sLinsert);
+bIgnoreBlanks=ifNull(bIgnoreBlanks,TRUE);
+//
+lFlds = sFieldList.toList(sDelim);
+r = zoho.crm.getRecordById(sTable,ID);
+// s will collect our concatenation, t is for current operation, f is for the current field, n the current fieldname, bSkip is for blanks
+s="";
+t="";
+f="";
+n="";
+bSkip = false;
+
+//loop to concatenate
+iPass = 1;
+for each fld in lFlds
+{
+
+	if(iPass=1)
+	{
+		f=r.get(fld);
+		n=fld;
+		bSkip=ifNull(f,"")=="");
+		iPass=2;
+	}
+	else if(bSkip)
+	{
+		iPass=1;
+		bSkip=False;
+	}
+	else
+	{
+		t=t.replaceAll(sFinsert,f,True);
+		t=t.replaceAll(sNinsert,f,True);
+		t=t.replaceAll(sLinsert,f,True);
+		iPass=1;
+
+	}
+	s=s+t
+}
+return s;
