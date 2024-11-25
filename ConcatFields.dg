@@ -29,48 +29,39 @@ sToStringFormat = "";
 bSkip = false;
 //loop to concatenate - there are two passes per field, first one is to Get Data
 bGetData = true;
-for each  fld in lFlds
-{
+for each  fld in lFlds {
 	fStart = fld.find(sTSI);
-	if(bGetData)
-	{
+	if(bGetData) 	{
 		bIsATime=(left(fld,4)=="{dt}");
 		n = if(bIsATime,fld.Right(len(fld)-4),fld);
 		f = r.get(n);
 		bSkip=(ifNull(f,"") == "");
-		if(bSkip && !bIgnoreBlanks)
-		{
+		if(bSkip && !bIgnoreBlanks) {
 			f = sBlanks;
 		}
 		bGetData = False;
 	}
-	else if(bSkip)
-	{
+	else if(bSkip) {
 		bGetData = True;
 	}
-	else if(fStart >= 0)
-	{
+	else if(fStart >= 0) {
 		fEnd = fld.find(sEndTSI);
 		sToStringFormat = fld.subString(fStart + sTSI.Length(),fEnd);
 		sToStringAll = fld.substring(fStart,fEnd + sEndTSI.length());
 		fld = fld.replaceAll(sLinsert,sLine,True);
 		fld = fld.replaceAll(sNinsert,n,True);
-		if(bIsATime)
-		{
+		if(bIsATime) {
 			fld = fld.replaceAll(sToStringAll,f.toTime("yyyy-MM-dd'T'HH:mm:ss").toString(sToStringFormat),true);
 			bIsATime=false;
 		}
-		else 
-        {
+		else {
 			fld = fld.replaceAll(sToStringAll,f.toString(sToStringFormat),true);
-        }
+    }
 		bGetData = True;
 		s = s + fld;
 	}
-	else
-	{
-		if(fld = "")
-		{
+	else {
+		if(fld = "") {
 			fld = sNinsert + ": " + sFinsert + sLinsert;
 			info "format null, changed to: " + fld;
 		}
