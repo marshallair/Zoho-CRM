@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen",
+		"testing.openTesting": "neverOpen",
+		"output.smartScroll.enabled": false,
+		"code-runner.runInTerminal": true
+	}
+}
