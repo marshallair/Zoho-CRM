@@ -1,4 +1,4 @@
-string standalone.TextMerge(string MergeText, string Data)
+string standalone.FieldMerge(string MergeText, string Data)
 {
 	MergeText="My name is {{Mr. }{Marshall }{Henley}}, programmer.";
 	// Variables
@@ -9,38 +9,70 @@ string standalone.TextMerge(string MergeText, string Data)
 	//
 	// START LOOPING TO FIND FIELDS AND PROCESS
 	counter = leftpad("1",(MergeText.Len()/4).toLong()).replaceAll(" ","1,").toList(); // the lame Deluge way of creating a counted loop => a list of serialized characters
-	for each index i in counter // i is just the index number of the entry in counter starting at 0
-	{
-		// search for either string
+	for each index i in counter // i starts at 0 {
+		// search for either field delimiter, open or closed curly braces
 		StackLevel=MergeStack.size()-1;
 		OpenBraceLoc=MergeText.mid(Beg).find("{");
 		ClosedBraceLoc=MergeText.mid(Beg).find("}");
-		if(OpenBraceLoc<0 && ClosedBraceLoc<0) // we're done
-		{
-			if(Beg<MergeText.len())
-			{
+		if(OpenBraceLoc<0 && ClosedBraceLoc<0) // we're done {
+			if(Beg<MergeText.len()) {
 				MergeStack=null;
 				Output=Output+MergeText.mid(Beg); // tack on what's left
 			}
 			break;
 		}
-		else if(OpenBraceLoc>ClosedBraceLoc&&i==0)
-		{
+		else if(OpenBraceLoc>ClosedBraceLoc&&i==0) {
 			e={"ERROR","Braces don't match"};
 			break;
 		}
-		else if(OpenBraceLoc>=0)
-		// We start a new field so we add to the stack and update the output
-		{
-			//take what's between Beg & OpenBraceLoc-1 and add it to MergeStack at StackLevel
+		//
+		// The real work starts here
+		else if(OpenBraceLoc>=0) {
+			// We start a new block{} testing for type, starting with functions, binary, and unary operators
+			Beg=OpenBraceLoc+1;
+			if(upper(MergeText.mid(OpenBraceLoc-5,OpenBraceLoc-1))=="$AND$") { logical and
+			}
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$OR$") { // logical or function
+			}
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NOR$") { // logical nor function
+			}			
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NAND$") { // logical nand function
+			}
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NOT$") { // logical unary not function
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="+") { // add
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="-") { // subtract
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="*") { // multiply
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="**") { // raise to power of
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="/") { // divide
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="--") { // unary negative
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="&&") { // and operator
+			}
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="||") { // or operator
+			}
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$IIF$") { // or immediate if function
+			}
+			else if(upper((MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$F$")
+				||(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$") { // Data field
+			MergeStack.add("FLD")
+			}
+			else {
+			}
+			// take what's between Beg & OpenBraceLoc-1 and add it to MergeStack at StackLevel
+			// We also need to det a flag for Next
 			MergeStack.add(MergeText.mid(Beg,OpenBraceLoc-1)); // PUSH
 			Output=Output+MergeStack.get(MergeStack.size()-1);
-			Beg=OpenBraceLoc+1;
+		
 		}
 		else if(ClosedBraceLoc>=0)
-		// We end a field so we update the oubput and reduce the stack
-		{
-			//evaluate what's between Beg & ClosedBraceLoc-1 and concatenate it with what in MergeStack at StackLevel, then pop it and concatenate with what's in MergeStack at StackLevel-1 
+		// We end a field so we update the oubput and reduce the stack {
+			//evaluate what's between Beg & ClosedBraceLoc-1 and concatenate it with what in MergeStack at StackLevel, then POP it and concatenate with what's in MergeStack at StackLevel-1 
 			Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedBraceLoc-1);
 			MergeStack.remove(StackLevel); // POP
 			Beg=ClosedBraceLoc+1;
