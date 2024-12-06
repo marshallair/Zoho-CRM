@@ -17,7 +17,8 @@ FieldMerge()
 	The FieldMerge "language" is based on the concept of blocks, functions, operators, and string text. Hereafter, the default OpenDelim, CloseDelim, and FunctionDelim
 	are used in the descriptions.
 
-BLOCKS
+FieldMerge() BLOCKS
+
 	A block, specified hereafter as Block{}, is a chuck of text that is treated as identifiably separate from the surrounding MergeText information.
 	Blocks can contain anything. Examples:
 		String text:																{Hello world!}
@@ -27,7 +28,8 @@ BLOCKS
 		
 	Between the ability to nest blocks, and use functions, any output can be achieved, including JSON or HTML.
 
-FUNCTIONS
+FieldMerge() FUNCTIONS
+
 	The Functions used within the FieldMerge() language always start with $ and end with $, as in $FUNCTIONNAME${}.
 	Parameters for functions appear as ordered blocks within the function, such as $IIF${{condition}{eval_if_true}{eval_if_false}}
 	Some functions can have no arguments, or unlimited arguments, such as $AND${{arg1}{arg2}...{argN}}.
@@ -49,7 +51,7 @@ FUNCTIONS
 
 		New functions can be easily written by including a new name in the if else block for parsing after an Open Delimiter is found.
 
-OPERATORS
+FieldMerge() OPERATORS
 	Between blocks{}, operators can be used to create compound evaluations:
 		OPERATOR						DESC															RETURNS
 		+										add or concatenate								if one value is a string, concat and return string, otherwise, add and return number
@@ -62,7 +64,7 @@ OPERATORS
 		||									logical OR												boolean (defaults as false unless one argument is boolean true)
 		!										logical NOT												boolean (defaults as false unless the block is boolean false)
 
-OPERATION
+FieldMerge() OPERATION
 	Because Deluge does not support recursion, and FieldMerge is intended to support unlimited nesting, a List is used like a stack to build the nested evaluations
 	into a structure, then remove them from the list when evaluated into items in which they are nested. FieldMerge processes the entire MergeText string using
 	looped searches for the OpenDelim and CloseDelim characters (hereafter we'll just used { and } to refer to these, although they can be changed).
