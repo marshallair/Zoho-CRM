@@ -36,39 +36,40 @@
 				break;
 			}
 			else if(OpenDelimiterLoc>=0) { 												// Block{} found
-				// We start a new block{} testing for type, starting with functions, binary, and unary operators
+				// TEST FOR FUNCTIONS
 				Beg=OpenDelimiterLoc+1;
-				if(standalone.IsBlockThisFunction("AND",MergeText,OpenDelimiterLoc,FunctionCharacter) { 										// logical and
+				if(standalone.IsBlockThisFunction("AND",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 										// logical and
 				}
-				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"NAND"+fd) { 							// logical nand function
+				else if(standalone.IsBlockThisFunction("NAND",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical nand function
 				}
-				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"OR"+fd) { 								// logical or function
+				else if(standalone.IsBlockThisFunction("OR",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 								// logical or function
 				}
-				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"NOR"+fd) { 							// logical nor function
+				else if(standalone.IsBlockThisFunction("NOR",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical nor function
 				}			
-				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"XOR"+fd) { 							// logical Xor function
+				else if(standalone.IsBlockThisFunction("XOR",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical Xor function
 				}			
-				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"NOT"+fd) { 							// logical unary not function
+				else if(standalone.IsBlockThisFunction("NOT",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical unary not function
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="+") { // add
+				// TEST FOR BINARY and UNARY OPERATORS
+				else if(standalone.IsBlockThisFunction("+",MergeText,OpenDelimiterLoc,"")) { // add operator
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="-") { // subtract
+				else if(standalone.IsBlockThisFunction("-",MergeText,OpenDelimiterLoc,"")) { // subtract
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="*") { // multiply
+				else if(standalone.IsBlockThisFunction("*",MergeText,OpenDelimiterLoc,"")) { // multiply
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="**") { // raise to power of
+				else if(standalone.IsBlockThisFunction("**",MergeText,OpenDelimiterLoc,"")) { // raise to power of
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="/") { // divide
+				else if(standalone.IsBlockThisFunction("/",MergeText,OpenDelimiterLoc,"")) { // divide
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="--") { // unary negative
+				else if(standalone.IsBlockThisFunction("--",MergeText,OpenDelimiterLoc,"")) { // unary negative
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="&&") { // and operator
+				else if(standalone.IsBlockThisFunction("&&",MergeText,OpenDelimiterLoc,"")) { // and operator
 				}
-				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="||") { // or operator
+				else if(standalone.IsBlockThisFunction("||",MergeText,OpenDelimiterLoc,"")) { // or operator
 				}
-				else if((upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"IIF"+fd)||(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"IF"+fd)) { 	// or immediate if function
+				else if(standalone.IsBlockThisFunction("IIF",MergeText,OpenDelimiterLoc,FunctionCharacter)||standalone.IsBlockThisFunction("IF",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 	// or immediate if function
 				}
-				else if((upper(MergeText.mid(OpenDelimiterLoc-2,OpenDelimiterLoc-1))==fd+"F"+fd)||(MergeText.mid(OpenDelimiterLoc-1,OpenDelimiterLoc-1)==fd)) { 								// data field
+				else if(standalone.IsBlockThisFunction("F",MergeText,OpenDelimiterLoc,FunctionCharacter)||(MergeText.mid(OpenDelimiterLoc-1,OpenDelimiterLoc)==fd)) { 								// data field
 					MergeStack.add("FLD");
 					MergeStack.add("FIELDNAME");
 					IsArgument=true;

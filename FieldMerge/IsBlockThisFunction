@@ -1,5 +1,5 @@
 string standalone.IsBlockThisFunction(String FunctionName,String MergeText,Int BlockDelimiterLocation,String FunctionCharacter)
 {
   // standalone.IsBlockThisFunction(FunctionName,MergeText,BlockDelimiterLocation,FunctionCharacter)
-  return (upper(MergeText.mid(BlockDelimiterLocation - FunctionName.Len() - 2,BlockDelimiterLocation)) == FunctionCharacter + FunctionName + FunctionCharacter).toString();
+  return (upper(MergeText.mid(BlockDelimiterLocation - FunctionName.Len() - (2*FunctionCharacter.len()), BlockDelimiterLocation)) == FunctionCharacter + FunctionName + FunctionCharacter).toString();
 }
