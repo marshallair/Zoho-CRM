@@ -2,7 +2,7 @@ string standalone.FieldMerge(string MergeText, string Data, string OpenDelimiter
 {
 // Sample Data
 MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
-Data='{PersTitle:"Mr.",Fname:"Marshall",Lname:"Henley",JobTitle:"Programmer"}';
+Data={PersTitle:"Mr.",Fname:"Marshall",Lname:"Henley",JobTitle:"Programmer"};
 // Defaults
 OpenDelimiter=ifnull(OpenDelimiter,"{");
 CloseDelimiter=ifnull(CloseDelimiter,"}");
