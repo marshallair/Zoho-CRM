@@ -1,8 +1,9 @@
 string standalone.FieldMerge(string MergeText, string Data)
 {
-	MergeText="My name is {{Mr. }{Marshall }{Henley}}, programmer.";
-	// Variables
-	MergeStack=list(); // where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(StackLevel=MergeStack.size()-1)
+	MergeText="My name is {${pers-title} {${fname} ${lname}}}, ${title}.";
+	Data='{pers-title:"Mr",fname:"Marshall",lname:"Henley",title:"programmer"}';'
+
+	MergeStack=List()  // where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(StackLevel=MergeStack.size()-1)
 	StackLevel=0; // where we are in the stack - should always equal MergeStack.size(), so may not be needed
 	Output = ""; //string for results
 	Beg=0; // where we begin searching for next field characters
@@ -30,39 +31,40 @@ string standalone.FieldMerge(string MergeText, string Data)
 		else if(OpenBraceLoc>=0) {
 			// We start a new block{} testing for type, starting with functions, binary, and unary operators
 			Beg=OpenBraceLoc+1;
-			if(upper(MergeText.mid(OpenBraceLoc-5,OpenBraceLoc-1))=="$AND$") { logical and
+			if(upper(MergeText.mid(OpenBraceLoc-5,OpenBraceLoc-1))=="$AND$") { logical AND function
 			}
-			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$OR$") { // logical or function
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$OR$") { // logical OR function
 			}
-			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NOR$") { // logical nor function
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NOR$") { // logical NOR function
 			}			
-			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NAND$") { // logical nand function
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NAND$") { // logical NAND function
 			}
-			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NOT$") { // logical unary not function
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$NOT$") { // logical unary NOT function
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="+") { // add
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="+") { // add operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="-") { // subtract
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="-") { // subtract operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="*") { // multiply
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="*") { // multiply operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="**") { // raise to power of
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="**") { // 'raise to power of' operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="/") { // divide
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="/") { // divide operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="--") { // unary negative
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="--") { // unary negative operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="&&") { // and operator
+			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="&&") { // AND operator
 			}
-			else if(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1)=="||") { // or operator
+			else if(MergeText.mid(OpenBraceLoc-4,OpeenBraceLoc-1)=="||") { // OR operator
 			}
-			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$IIF$") { // or immediate if function
+			else if(upper(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$IIF$") { // or Immediate IF function
 			}
 			else if(upper((MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$F$")
 				||(MergeText.mid(OpenBraceLoc-4,OpenBraceLoc-1))=="$") { // Data field
 			MergeStack.add("FLD")
 			}
 			else {
+				
 			}
 			// take what's between Beg & OpenBraceLoc-1 and add it to MergeStack at StackLevel
 			// We also need to det a flag for Next
