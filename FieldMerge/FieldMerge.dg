@@ -2,7 +2,7 @@ string standalone.FieldMerge(string MergeText, string Data, string OpenDelimiter
 {
 // Sample Data
 MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
-Data={PersTitle:"Mr.",Fname:"Marshall",Lname:"Henley",JobTitle:"Programmer"};
+Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
 // Defaults
 OpenDelimiter=ifnull(OpenDelimiter,"{");
 CloseDelimiter=ifnull(CloseDelimiter,"}");
@@ -76,7 +76,7 @@ for each index i in counter {
 		else if(standalone.IsBlockThisFunction("F",MergeText,OpenDelimiterLocation,FunctionCharacter)||standalone.IsBlockThisFunction("$",MergeText,OpenDelimiterLocation,"")) { 								// data field
 			MergeStack.add("FLD");																		// placeholder for final evaluated value
 			MergeStack.add("FIELDNAME");															// fieldname will be identified and placed here
-			MergeStack.add("EVAL_IF_NULL_OR_ERROR");W										// optional block to evaluate if the fieldname generates an error is null value
+			MergeStack.add("EVAL_IF_NULL_OR_ERROR");										// optional block to evaluate if the fieldname generates an error is null value
 			StackLevel=StackLevel+1;
 			IsArgument=true;
 		}
@@ -93,28 +93,27 @@ for each index i in counter {
 	else if(ClosedDelimiterLocation>=0) {											// Block{} end found
 		ArgType=MergeStack.get(StackLevel);
 		if(IsArgument) {
-			else if(ArgType=="FLD") {
+			MergeStack.remove(StackLevel); // POP
+			Beg=ClosedDelimiterLocation+1;
+			if(ArgType=="FLD") {
 			}
 			else if(ArgType=="FIELDNAME") {
 			}
-			else if(ArgTYpe=="EVAL_IF_NULL_OR_ERROR") {		
+			else if(ArgType=="EVAL_IF_NULL_OR_ERROR") {		
 			}
-
+			else if(ArgType="BLOCK") {
+				Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimiterLocation-1);
+			}
 		}
-		else if ArgType="BLOCK" {
-			Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimiterLocation-1);
-		}
-		MergeStack.remove(StackLevel); // POP
-		Beg=ClosedDelimiterLocation+1;
 	}
 }
 // END LOOP
 //
 // return function value
-if(!isnull(e))
-{
+if(!isnull(e)) {
 	return e;
 }
 else {
 	return Output;
+}
 }
