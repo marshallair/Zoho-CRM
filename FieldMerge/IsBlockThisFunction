@@ -1,0 +1,4 @@
+string standalone.IsBlockThisFunction(String FunctionName,String MergeText,Int BlockDelimiterLocation,String FunctionDelimiter)
+{
+  return (upper(MergeText.mid(BlockDelimiterLocation - FunctionName.Len() - 2,BlockDelimiterLocation)) == FunctionDelimiter + FunctionName + FunctionDelimiter).toString();
+}
