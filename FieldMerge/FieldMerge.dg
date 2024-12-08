@@ -1,13 +1,13 @@
-	string standalone.FieldMerge(string MergeText, string Data, string OpenDelim, string CloseDelim, string FunctionDelim)
+	string standalone.FieldMerge(string MergeText, string Data, string OpenDelimiter, string CloseDelimiter, string FunctionCharacter)
 	{
 		// Sample Data
 		MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 		Data='{PersTitle:"Mr.",Fname:"Marshall",Lname:"Henley",JobTitle:"Programmer"}';
 		// Defaults
-		OpenDelim=ifnull(OpenDelim,"{");
-		CloseDelim=ifnull(CloseDelim,"}");
-		FunctionDelim=ifnull(FunctionDelim,"$");
-		fd=FunctionDelim; 																	// just keeping things short in code
+		OpenDelimiter=ifnull(OpenDelimiter,"{");
+		CloseDelimiter=ifnull(CloseDelimiter,"}");
+		FunctionCharacter=ifnull(FunctionCharacter,"$");
+		fd=FunctionCharacter; 																	// just keeping things short in code
 
 		//
 		// Variables
@@ -22,53 +22,53 @@
 		for each index i in counter {
 			// search for either block{} delimiter
 			StackLevel=MergeStack.size()-1;
-			OpenDelimLoc=MergeText.mid(Beg).find(OpenDelim);
-			ClosedDelimLoc=MergeText.mid(Beg).find(CloseDelim);
-			if(OpenDelimLoc<0 && ClosedDelimLoc<0) {					// we're done -> no delimiters found
+			OpenDelimiterLoc=MergeText.mid(Beg).find(OpenDelimiter);
+			ClosedDelimLoc=MergeText.mid(Beg).find(CloseDelimiter);
+			if(OpenDelimiterLoc<0 && ClosedDelimLoc<0) {					// we're done -> no delimiters found
 				if(Beg<MergeText.len()) {
 					MergeStack=null;
 					Output=Output+MergeText.mid(Beg); 						// tack on what's left
 				}
 				break;
 			}
-			else if(OpenDelimLoc>ClosedDelimLoc&&i==0) {			// Mismatch
+			else if(OpenDelimiterLoc>ClosedDelimLoc&&i==0) {			// Mismatch
 				e={"ERROR","Braces don't match"};
 				break;
 			}
-			else if(OpenDelimLoc>=0) { 												// Block{} found
+			else if(OpenDelimiterLoc>=0) { 												// Block{} found
 				// We start a new block{} testing for type, starting with functions, binary, and unary operators
-				Beg=OpenDelimLoc+1;
-				if(upper(MergeText.mid(OpenDelimLoc-5,OpenDelimLoc-1))==fd+"AND"+fd) { 										// logical and
+				Beg=OpenDelimiterLoc+1;
+				if(standalone.IsBlockThisFunction("AND",MergeText,OpenDelimiterLoc,FunctionCharacter) { 										// logical and
 				}
-				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NAND"+fd) { 							// logical nand function
+				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"NAND"+fd) { 							// logical nand function
 				}
-				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"OR"+fd) { 								// logical or function
+				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"OR"+fd) { 								// logical or function
 				}
-				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NOR"+fd) { 							// logical nor function
+				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"NOR"+fd) { 							// logical nor function
 				}			
-				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"XOR"+fd) { 							// logical Xor function
+				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"XOR"+fd) { 							// logical Xor function
 				}			
-				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NOT"+fd) { 							// logical unary not function
+				else if(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"NOT"+fd) { 							// logical unary not function
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="+") { // add
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="+") { // add
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="-") { // subtract
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="-") { // subtract
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="*") { // multiply
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="*") { // multiply
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="**") { // raise to power of
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="**") { // raise to power of
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="/") { // divide
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="/") { // divide
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="--") { // unary negative
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="--") { // unary negative
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="&&") { // and operator
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="&&") { // and operator
 				}
-				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="||") { // or operator
+				else if(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1)=="||") { // or operator
 				}
-				else if((upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"IIF"+fd)||(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"IF"+fd)) { 	// or immediate if function
+				else if((upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"IIF"+fd)||(upper(MergeText.mid(OpenDelimiterLoc-4,OpenDelimiterLoc-1))==fd+"IF"+fd)) { 	// or immediate if function
 				}
-				else if((upper(MergeText.mid(OpenDelimLoc-2,OpenDelimLoc-1))==fd+"F"+fd)||(MergeText.mid(OpenDelimLoc-1,OpenDelimLoc-1)==fd)) { 								// data field
+				else if((upper(MergeText.mid(OpenDelimiterLoc-2,OpenDelimiterLoc-1))==fd+"F"+fd)||(MergeText.mid(OpenDelimiterLoc-1,OpenDelimiterLoc-1)==fd)) { 								// data field
 					MergeStack.add("FLD");
 					MergeStack.add("FIELDNAME");
 					IsArgument=true;
@@ -76,9 +76,9 @@
 				else {
 					MergeStack.add("BLOCK");
 				}
-				// take what's between Beg & OpenDelimLoc-1 and add it to MergeStack at StackLevel
+				// take what's between Beg & OpenDelimiterLoc-1 and add it to MergeStack at StackLevel
 				// We also need to det a flag for Next
-				MergeStack.add(MergeText.mid(Beg,OpenDelimLoc-1)); // PUSH
+				MergeStack.add(MergeText.mid(Beg,OpenDelimiterLoc-1)); // PUSH
 				Output=Output+MergeStack.get(MergeStack.size()-1);
 			
 			}
