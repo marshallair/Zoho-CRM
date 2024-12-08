@@ -24,56 +24,56 @@ for each index i in counter {
 	if(!IsArgument) {                                 // if arguments identifiers have been preloaded into the List, they the StackLevel is controlled by the argument processing, otherwise, it's the end
 		StackLevel=MergeStack.size()-1;
 	}
-	OpenDelimiterLoc=MergeText.mid(Beg).find(OpenDelimiter);
-	ClosedDelimLoc=MergeText.mid(Beg).find(CloseDelimiter);
-	if(OpenDelimiterLoc<0 && ClosedDelimLoc<0) {					// we're done -> no delimiters found
+	OpenDelimiterLocation=MergeText.mid(Beg).find(OpenDelimiter);
+	ClosedDelimiterLocation=MergeText.mid(Beg).find(CloseDelimiter);
+	if(OpenDelimiterLocation<0 && ClosedDelimiterLocation<0) {					// we're done -> no delimiters found
 		if(Beg<MergeText.len()) {
 			MergeStack=null;
 			Output=Output+MergeText.mid(Beg); 						// tack on what's left
 		}
 		break;
 	}
-	else if(OpenDelimiterLoc>ClosedDelimLoc&&i==0) {			// Mismatch
+	else if(OpenDelimiterLocation>ClosedDelimiterLocation&&i==0) {			// Mismatch
 		e={"ERROR","Braces don't match"};
 		break;
 	}
-	else if(OpenDelimiterLoc>=0) { 												// Block{} found
+	else if(OpenDelimiterLocation>=0) { 												// Block{} found
 		// TEST FOR FUNCTIONS - ignore preceding text
-		Beg=OpenDelimiterLoc+1;
-		if(standalone.IsBlockThisFunction("AND",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 										// logical and
+		Beg=OpenDelimiterLocation+1;
+		if(standalone.IsBlockThisFunction("AND",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 										// logical and
 		}
-		else if(standalone.IsBlockThisFunction("NAND",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical nand function
+		else if(standalone.IsBlockThisFunction("NAND",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 							// logical nand function
 		}
-		else if(standalone.IsBlockThisFunction("OR",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 								// logical or function
+		else if(standalone.IsBlockThisFunction("OR",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 								// logical or function
 		}
-		else if(standalone.IsBlockThisFunction("NOR",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical nor function
+		else if(standalone.IsBlockThisFunction("NOR",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 							// logical nor function
 		}			
-		else if(standalone.IsBlockThisFunction("XOR",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical Xor function
+		else if(standalone.IsBlockThisFunction("XOR",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 							// logical Xor function
 		}			
-		else if(standalone.IsBlockThisFunction("NOT",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 							// logical unary not function
+		else if(standalone.IsBlockThisFunction("NOT",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 							// logical unary not function
 		}
 		// TEST FOR BINARY and UNARY OPERATORS - ignore preceding text
-		else if(standalone.IsBlockThisFunction("+",MergeText,OpenDelimiterLoc,"")) { // add operator
+		else if(standalone.IsBlockThisFunction("+",MergeText,OpenDelimiterLocation,"")) { // add operator
 		}
-		else if(standalone.IsBlockThisFunction("-",MergeText,OpenDelimiterLoc,"")) { // subtract
+		else if(standalone.IsBlockThisFunction("-",MergeText,OpenDelimiterLocation,"")) { // subtract
 		}
-		else if(standalone.IsBlockThisFunction("*",MergeText,OpenDelimiterLoc,"")) { // multiply
+		else if(standalone.IsBlockThisFunction("*",MergeText,OpenDelimiterLocation,"")) { // multiply
 		}
-		else if(standalone.IsBlockThisFunction("**",MergeText,OpenDelimiterLoc,"")) { // raise to power of
+		else if(standalone.IsBlockThisFunction("**",MergeText,OpenDelimiterLocation,"")) { // raise to power of
 		}
-		else if(standalone.IsBlockThisFunction("/",MergeText,OpenDelimiterLoc,"")) { // divide
+		else if(standalone.IsBlockThisFunction("/",MergeText,OpenDelimiterLocation,"")) { // divide
 		}
-		else if(standalone.IsBlockThisFunction("--",MergeText,OpenDelimiterLoc,"")) { // unary negative
+		else if(standalone.IsBlockThisFunction("--",MergeText,OpenDelimiterLocation,"")) { // unary negative
 		}
-		else if(standalone.IsBlockThisFunction("&&",MergeText,OpenDelimiterLoc,"")) { // and operator
+		else if(standalone.IsBlockThisFunction("&&",MergeText,OpenDelimiterLocation,"")) { // and operator
 		}
-		else if(standalone.IsBlockThisFunction("||",MergeText,OpenDelimiterLoc,"")) { // or operator
+		else if(standalone.IsBlockThisFunction("||",MergeText,OpenDelimiterLocation,"")) { // or operator
 		}
 		// TEST FOR IIF - ignore preceding text
-		else if(standalone.IsBlockThisFunction("IIF",MergeText,OpenDelimiterLoc,FunctionCharacter)||standalone.IsBlockThisFunction("IF",MergeText,OpenDelimiterLoc,FunctionCharacter)) { 	// or immediate if function
+		else if(standalone.IsBlockThisFunction("IIF",MergeText,OpenDelimiterLocation,FunctionCharacter)||standalone.IsBlockThisFunction("IF",MergeText,OpenDelimiterLocation,FunctionCharacter)) { 	// or immediate if function
 		}
 		// TEST FOR FIELD BLOCKS - don't ignore preceding text
-		else if(standalone.IsBlockThisFunction("F",MergeText,OpenDelimiterLoc,FunctionCharacter)||standalone.IsBlockThisFunction("$",MergeText,OpenDelimiterLoc,"")) { 								// data field
+		else if(standalone.IsBlockThisFunction("F",MergeText,OpenDelimiterLocation,FunctionCharacter)||standalone.IsBlockThisFunction("$",MergeText,OpenDelimiterLocation,"")) { 								// data field
 			MergeStack.add("FLD");																		// placeholder for final evaluated value
 			MergeStack.add("FIELDNAME");															// fieldname will be identified and placed here
 			MergeStack.add("EVAL_IF_NULL_OR_ERROR")										// optional block to evaluate if the fieldname generates an error is null value
@@ -84,31 +84,28 @@ for each index i in counter {
 		else {
 			MergeStack.add("BLOCK");
 		}
-		// take what's between Beg & OpenDelimiterLoc-1 and add it to MergeStack at StackLevel
+		// take what's between Beg & OpenDelimiterLocation-1 and add it to MergeStack at StackLevel
 		// We also need to det a flag for Next
-		MergeStack.add(MergeText.mid(Beg,OpenDelimiterLoc-1)); // PUSH
+		MergeStack.add(MergeText.mid(Beg,OpenDelimiterLocation-1)); // PUSH
 		Output=Output+MergeStack.get(MergeStack.size()-1);
 	
 	}
-	else if(ClosedDelimLoc>=0) {											// Block{} end found
+	else if(ClosedDelimiterLocation>=0) {											// Block{} end found
 		ArgType=MergeStack.get(StackLevel);
 		if(IsArgument) {
-			if(ArgType=="FIELDNAME") {
+			else if(ArgType=="FLD") {
+			}
+			else if(ArgType=="FIELDNAME") {
+			}
+			else if(ArgTYpe=="EVAL_IF_NULL_OR_ERROR") {		
+			}
 
-			}
-			}
 		}
-		else {
-			if(ArgType=="FIELD") {
-
-			}
-			else if(ArgType=="BLOCK") {
-				MergeStack.
-			}
-			Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimLoc-1);
+		else if ArgType="BLOCK" {
+			Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimiterLocation-1);
 		}
 		MergeStack.remove(StackLevel); // POP
-		Beg=ClosedDelimLoc+1;
+		Beg=ClosedDelimiterLocation+1;
 	}
 }
 // END LOOP

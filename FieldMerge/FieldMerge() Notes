@@ -1,0 +1,19 @@
+Current approach:
+
+Loop for blocks, process opening of blocks for functions, then pre-load stack with function name then function arguments
+For closing blocks, check for function arguments and process as directed
+
+Order of development and testing:
+  BLOCK {}
+  FIELD ${} or $F${}
+    just field name
+    with EVAL_IF_NULL_OR_ERROR block
+  AND{}
+  OR{}
+  && operator
+  || operator
+  + operator
+  -- unary negative operator (can I do single - and detect somehow?)
+  IIF{}
+  ALL functions
+  ALL operators
