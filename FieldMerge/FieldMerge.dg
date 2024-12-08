@@ -76,7 +76,7 @@ for each index i in counter {
 		else if(standalone.IsBlockThisFunction("F",MergeText,OpenDelimiterLocation,FunctionCharacter)||standalone.IsBlockThisFunction("$",MergeText,OpenDelimiterLocation,"")) { 								// data field
 			MergeStack.add("FLD");																		// placeholder for final evaluated value
 			MergeStack.add("FIELDNAME");															// fieldname will be identified and placed here
-			MergeStack.add("EVAL_IF_NULL_OR_ERROR")										// optional block to evaluate if the fieldname generates an error is null value
+			MergeStack.add("EVAL_IF_NULL_OR_ERROR");										// optional block to evaluate if the fieldname generates an error is null value
 			StackLevel=StackLevel+1;
 			IsArgument=true;
 		}
