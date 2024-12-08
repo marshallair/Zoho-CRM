@@ -1,101 +1,117 @@
-string standalone.FieldMerge(string MergeText, string Data, string OpenDelim, string CloseDelim, string FunctionDelim)
-{
-	// Sample Data
-	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
-	Data='{PersTitle:"Mr.",Fname:"Marshall",Lname:"Henley",JobTitle:"Programmer"}'
-	// Defaults
-	OpenDelim=ifnull(OpenDelim,"{");
-	CloseDelim=ifnull(CloseDelim,"}");
-	FunctionDelim=ifnull(FunctionDelim,"$");
-	fd=FunctionDelim; 																	// just keeping things short in code
-
-	//
-	// Variables
-	MergeStack=list(); 																	// where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(StackLevel=MergeStack.size()-1)
-	StackLevel=0; 																			// where we are in the stack - should always equal MergeStack.size(), so may not be needed
-	Output = ""; 																				//string for results
-	Beg=0; 																							// where we begin searching for next field characters
-	//
-	// START LOOPING TO FIND FIELDS AND PROCESS
-	counter = leftpad("1",(MergeText.Len()/4).toLong()).replaceAll(" ","1,").toList(); 				// the lame Deluge way of creating a counted loop => a list of serialized characters, i starts a 0
-	for each index i in counter {
-		// search for either block{} delimiter
-		StackLevel=MergeStack.size()-1;
-		OpenDelimLoc=MergeText.mid(Beg).find(OpenDelim);
-		ClosedDelimLoc=MergeText.mid(Beg).find(CloseDelim);
-		if(OpenDelimLoc<0 && ClosedDelimLoc<0) {					// we're done -> no delimiters found
-			if(Beg<MergeText.len()) {
-				MergeStack=null;
-				Output=Output+MergeText.mid(Beg); 						// tack on what's left
-			}
-			break;
-		}
-		else if(OpenDelimLoc>ClosedDelimLoc&&i==0) {			// Mismatch
-			e={"ERROR","Braces don't match"};
-			break;
-		}
-		else if(OpenDelimLoc>=0) { 												// Block{} found
-			// We start a new block{} testing for type, starting with functions, binary, and unary operators
-			Beg=OpenDelimLoc+1;
-			if(upper(MergeText.mid(OpenDelimLoc-5,OpenDelimLoc-1))==fd+"AND"+fd) { logical and
-			}
-			else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NAND"+fd) { 							// logical nand function
-			}
-			else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"OR"+fd) { 								// logical or function
-			}
-			else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NOR"+fd) { 							// logical nor function
-			}			
-			else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"XOR"+fd) { 							// logical Xor function
-			}			
-			else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NOT"+fd) { 							// logical unary not function
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="+") { // add
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="-") { // subtract
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="*") { // multiply
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="**") { // raise to power of
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="/") { // divide
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="--") { // unary negative
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="&&") { // and operator
-			}
-			else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="||") { // or operator
-			}
-			else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))=="$IIF$") { // or immediate if function
-			}
-			else if(upper((MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))=="$F$")
-				||(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))=="$") { // Data field
-			MergeStack.add("FLD")
-			}
-			else {
-			}
-			// take what's between Beg & OpenDelimLoc-1 and add it to MergeStack at StackLevel
-			// We also need to det a flag for Next
-			MergeStack.add(MergeText.mid(Beg,OpenDelimLoc-1)); // PUSH
-			Output=Output+MergeStack.get(MergeStack.size()-1);
-		
-		}
-		else if(ClosedDelimLoc>=0)											// Block{} end found
-		// We end a field so we update the oubput and reduce the stack {
-			//evaluate what's between Beg & ClosedDelimLoc-1 and concatenate it with what in MergeStack at StackLevel, then POP it and concatenate with what's in MergeStack at StackLevel-1 
-			Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimLoc-1);
-			MergeStack.remove(StackLevel); // POP
-			Beg=ClosedDelimLoc+1;
-		}
-	}
-	// END LOOP
-	//
-	// return function value
-	if(!isnull(e))
+	string standalone.FieldMerge(string MergeText, string Data, string OpenDelim, string CloseDelim, string FunctionDelim)
 	{
-		return e;
+		// Sample Data
+		MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
+		Data='{PersTitle:"Mr.",Fname:"Marshall",Lname:"Henley",JobTitle:"Programmer"}';
+		// Defaults
+		OpenDelim=ifnull(OpenDelim,"{");
+		CloseDelim=ifnull(CloseDelim,"}");
+		FunctionDelim=ifnull(FunctionDelim,"$");
+		fd=FunctionDelim; 																	// just keeping things short in code
+
+		//
+		// Variables
+		MergeStack=list(); 																	// where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(StackLevel=MergeStack.size()-1)
+		StackLevel=0; 																			// where we are in the stack - should always equal MergeStack.size(), so may not be needed
+		Output = ""; 																				// string for results
+		Beg=0; 																							// where we begin searching for next field characters
+		IsArgument=false;																		// boolean indicating the current pass already has a stack element associated with an argument to be processed
+		//
+		// START LOOPING TO FIND FIELDS AND PROCESS
+		counter = leftpad("1",(MergeText.Len()/4).toLong()).replaceAll(" ","1,").toList(); 				// the lame Deluge way of creating a counted loop => a list of serialized characters, i starts a 0
+		for each index i in counter {
+			// search for either block{} delimiter
+			StackLevel=MergeStack.size()-1;
+			OpenDelimLoc=MergeText.mid(Beg).find(OpenDelim);
+			ClosedDelimLoc=MergeText.mid(Beg).find(CloseDelim);
+			if(OpenDelimLoc<0 && ClosedDelimLoc<0) {					// we're done -> no delimiters found
+				if(Beg<MergeText.len()) {
+					MergeStack=null;
+					Output=Output+MergeText.mid(Beg); 						// tack on what's left
+				}
+				break;
+			}
+			else if(OpenDelimLoc>ClosedDelimLoc&&i==0) {			// Mismatch
+				e={"ERROR","Braces don't match"};
+				break;
+			}
+			else if(OpenDelimLoc>=0) { 												// Block{} found
+				// We start a new block{} testing for type, starting with functions, binary, and unary operators
+				Beg=OpenDelimLoc+1;
+				if(upper(MergeText.mid(OpenDelimLoc-5,OpenDelimLoc-1))==fd+"AND"+fd) { 										// logical and
+				}
+				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NAND"+fd) { 							// logical nand function
+				}
+				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"OR"+fd) { 								// logical or function
+				}
+				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NOR"+fd) { 							// logical nor function
+				}			
+				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"XOR"+fd) { 							// logical Xor function
+				}			
+				else if(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"NOT"+fd) { 							// logical unary not function
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="+") { // add
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="-") { // subtract
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="*") { // multiply
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="**") { // raise to power of
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="/") { // divide
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="--") { // unary negative
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="&&") { // and operator
+				}
+				else if(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1)=="||") { // or operator
+				}
+				else if((upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"IIF"+fd)||(upper(MergeText.mid(OpenDelimLoc-4,OpenDelimLoc-1))==fd+"IF"+fd)) { 	// or immediate if function
+				}
+				else if((upper(MergeText.mid(OpenDelimLoc-2,OpenDelimLoc-1))==fd+"F"+fd)||(MergeText.mid(OpenDelimLoc-1,OpenDelimLoc-1)==fd)) { 								// data field
+					MergeStack.add("FLD");
+					MergeStack.add("FIELDNAME");
+					IsArgument=true;
+				}
+				else {
+					MergeStack.add("BLOCK");
+				}
+				// take what's between Beg & OpenDelimLoc-1 and add it to MergeStack at StackLevel
+				// We also need to det a flag for Next
+				MergeStack.add(MergeText.mid(Beg,OpenDelimLoc-1)); // PUSH
+				Output=Output+MergeStack.get(MergeStack.size()-1);
+			
+			}
+			else if(ClosedDelimLoc>=0) {											// Block{} end found
+				ArgType=MergeStack.get(StackLevel);
+				if(IsArgument) {
+					if(ArgType=="FIELDNAME") {
+
+					}
+					}
+				}
+				else {
+					if(ArgType=="FIELD") {
+
+					}
+					else if(ArgType=="BLOCK") {
+						MergeStack.
+					}
+					Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimLoc-1);
+				}
+				MergeStack.remove(StackLevel); // POP
+				Beg=ClosedDelimLoc+1;
+			}
+		}
+		// END LOOP
+		//
+		// return function value
+		if(!isnull(e))
+		{
+			return e;
+		}
+		else 
+			{
+			return Output;
+			}
 	}
-	else 
-    {
-		return Output;
-    }
-}

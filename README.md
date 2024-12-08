@@ -102,9 +102,9 @@ FieldMerge() serves a similar purpose to ConcatFields, in that it mixes field da
 
 ConcatFields()
 ConcatFields() is standalone function that retrieves a list of fields and concatenates them
- with while using a formatting string (labels and line breaks, typically, but any can be used). A simplified version that just uses field names
- for labels with a colon and space appended, the field values are next, followed by the default line break text. This is the default when
- no formatting string in sFieldList is provided (such as "Fiend+Name1,,Fieldname2,,Fieldname3,,...").
+ with while using a formatting string (labels and line breaks, typically, but any can be used). A simplified version can be used that just outputs field names
+ for labels with a colon and space appended is, field values next, followed by the default line break text. This is the default when
+ no formatting string in sFieldList is provided (such as "Fieldname1,,Fieldname2,,Fieldname3,,...").
  
  Blank values can be surpressed or allowed. If suppressed, the entire section associated with that field is omitted.
  
@@ -128,7 +128,7 @@ ConcatFields() is standalone function that retrieves a list of fields and concat
 
 sFieldList is in itself a string parameter list, as follows:
 	The sFieldList parameter assumes substrings as parameters in pairs with "{,}" as the default delimiter (set by sDelim),
-	namely: FieldName1{,}Format2{,}FieldName2{,}Format2{,}...FieldName_n{,}Format_n
+	namely: FieldName1{,}Format1{,}FieldName2{,}Format2{,}...FieldName_n{,}Format_n
 	(note: fieldnames that are Date/Time fields must be preceded by "{dt}" - Example of sFieldList with a date/time field and a format string = "{dt}StartDateTime{,}Start time: {f$}MMM/dd/yyyy hh:ss{\f$}")
 
 	The sFieldList internal delimiter is set by sDelim, which defaults to "{,}" to avoid the likelihood that it will be used in a parameter
@@ -156,7 +156,7 @@ sFieldList is in itself a string parameter list, as follows:
 			Name: Marshall Henley
 			Born on the date of 3/18/1970
 
-			Name: Amy Henley
+			Name: Joe Henley
 			Born on the date of 2/21/1972
 
 			FIELD EMPTY
