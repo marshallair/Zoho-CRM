@@ -1,0 +1,89 @@
+string standalone.TestStructures(string MergeText, string Data, string OpenDelimiter, string CloseDelimiter, string FunctionCharacter)
+{
+// Sample Data
+MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
+Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
+// Defaults
+OpenDelimiter=ifnull(OpenDelimiter,"{");
+CloseDelimiter=ifnull(CloseDelimiter,"}");
+FunctionCharacter=ifnull(FunctionCharacter,"$");
+fd=FunctionCharacter;                              // just keeping things short in code
+
+//
+// Variables
+MergeStack=list();                                 // where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(StackLevel=MergeStack.size()-1)
+StackLevel=0;                                      // where we are in the stack - should always equal MergeStack.size(), so may not be needed
+Output = "";                                       // string for results
+Beg=0;                                             // where we begin searching for next field characters
+IsArgument=false;                                  // boolean indicating the current pass already has a stack element associated with an argument to be processed
+//
+// START LOOPING TO FIND FIELDS AND PROCESS
+counter = leftpad("1",(MergeText.Len()/4).toLong()).replaceAll(" ","1,").toList();           // the lame Deluge way of creating a counted loop => a list of serialized characters, i starts a 0
+for each index i in counter {
+  // search for either block{} delimiter
+  if(!IsArgument) {                                 // if arguments identifiers have been preloaded into the List, they the StackLevel is controlled by the argument processing, otherwise, it's the end
+    StackLevel=MergeStack.size()-1;
+  }
+  OpenDelimiterLocation=MergeText.mid(Beg).find(OpenDelimiter);
+  ClosedDelimiterLocation=MergeText.mid(Beg).find(CloseDelimiter);
+  if(OpenDelimiterLocation<0 && ClosedDelimiterLocation<0) {          // we're done -> no delimiters found
+    if(Beg<MergeText.len()) {
+      MergeStack=null;
+      Output=Output+MergeText.mid(Beg);                               // tack on what's left
+    }
+    break;
+  }
+  else if(OpenDelimiterLocation>ClosedDelimiterLocation&&i==0) {      // Mismatch
+    e={"ERROR","Braces don't match"};
+    break;
+  }
+  else if(OpenDelimiterLocation>=0) {                                 // Block{} found
+    // TEST FOR FUNCTIONS - ignore preceding text
+    Beg=OpenDelimiterLocation+1;
+    
+    // TEST FOR FIELD BLOCKS - don't ignore preceding text
+    if(standalone.IsBlockThisFunction("F",MergeText,OpenDelimiterLocation,FunctionCharacter)||standalone.IsBlockThisFunction("$",MergeText,OpenDelimiterLocation,"")) {              // data field
+      MergeStack.add("FLD");                                    // placeholder for final evaluated value
+      MergeStack.add("FIELDNAME");                              // fieldname will be identified and placed here
+      MergeStack.add("EVAL_IF_NULL_OR_ERROR");                  // optional block to evaluate if the fieldname generates an error is null value
+      StackLevel=StackLevel+1;
+      IsArgument=true;
+    }
+    // IT'S A PLAIN BLOCK - don't ignore preceding text
+    else {
+      PrecedingText=MergeText.mid(Beg,OpenDelimiterLocation);
+      if(!isnull(PrecedingText) {
+        MergeStack.add("PRETEXT|:"+PrecedingText);
+      }
+      MergeStack.add("BLOCK|:");
+      IsArgument=false;
+    }
+  
+  }
+  else if(ClosedDelimiterLocation>=0) {                               // Block{} end found
+    ArgType=MergeStack.get(StackLevel);
+    ArgType=ArgType.mid(0,argtype.find("|:"));
+    if(ArgType="BLOCK") {
+    }
+    else if(ArgType=="PRETEXT") {
+    }
+    else if(ArgType=="FIELDNAME") {
+    }
+    else if(ArgType=="EVAL_IF_NULL_OR_ERROR") {		
+    }
+    else if(ArgType=="FLD") {
+      Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimiterLocation-1);
+    }
+    }
+  }
+}
+// END LOOP
+//
+// return function value
+if(!isnull(e)) {
+  return e;
+}
+else {
+  return Output;
+}
+}

@@ -3,8 +3,11 @@ Current approach:
 Loop for blocks, process opening of blocks for functions, then pre-load stack with function name then function arguments
 For closing blocks, check for function arguments and process as directed
 
+All list entries have a prefix, like PREFIX|: where the |: is ignored, but forms a delimiter
+
 Order of development and testing:
   BLOCK {}
+  DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
   FIELD ${} or $F${}
     just field name
     with EVAL_IF_NULL_OR_ERROR block

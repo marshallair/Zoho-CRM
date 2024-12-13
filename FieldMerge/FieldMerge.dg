@@ -82,28 +82,29 @@ for each index i in counter {
     }
     // IT'S A PLAIN BLOCK - don't ignore preceding text
     else {
-      MergeStack.add("BLOCK");
+      PrecedingText=MergeText.mid(Beg,OpenDelimiterLocation);
+      if(!isnull(PrecedingText) {
+        MergeStack.add("PRETEXT|:"+PrecedingText);
+      }
+      MergeStack.add("BLOCK|:");
+      IsArgument=false;
     }
-    // take what's between Beg & OpenDelimiterLocation-1 and add it to MergeStack at StackLevel
-    // We also need to det a flag for Next
-    MergeStack.add(MergeText.mid(Beg,OpenDelimiterLocation-1)); // PUSH
-    Output=Output+MergeStack.get(MergeStack.size()-1);
   
   }
   else if(ClosedDelimiterLocation>=0) {                               // Block{} end found
     ArgType=MergeStack.get(StackLevel);
-    if(IsArgument) {
-      MergeStack.remove(StackLevel); // POP
-      Beg=ClosedDelimiterLocation+1;
-      if(ArgType=="FLD") {
-      }
-      else if(ArgType=="FIELDNAME") {
-      }
-      else if(ArgType=="EVAL_IF_NULL_OR_ERROR") {		
-      }
-      else if(ArgType="BLOCK") {
-        Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimiterLocation-1);
-      }
+    ArgType=ArgType.mid(0,argtype.find("|:"));
+    if(ArgType="BLOCK") {
+    }
+    else if(ArgType=="PRETEXT") {
+    }
+    else if(ArgType=="FIELDNAME") {
+    }
+    else if(ArgType=="EVAL_IF_NULL_OR_ERROR") {		
+    }
+    else if(ArgType=="FLD") {
+      Output=Output+MergeStack.get(StackLevel)+MergeText.mid(Beg,ClosedDelimiterLocation-1);
+    }
     }
   }
 }
