@@ -8,11 +8,11 @@ FieldMerge()
 	that can be used anywhere strings are use.
 
 	The FieldMerge() arguments are:
-		String MergeText														A string representing the "merge language" of FieldMerge() to be parsed for output
-		String Data																	JSON or Map data passed to FieldMerge to provide the data to replace field blocks in MergeText with actual field values
+		String MergeText										A string representing the "merge language" of FieldMerge() to be parsed for output
+		String Data												JSON or Map data passed to FieldMerge to provide the data to replace field blocks in MergeText with actual field values
 		String OpenDelimiter (optional)							A open block delimiter. If left null, "{" is the default
 		String CloseDelimiter (optional)						A close block delimiter. If left null, "}" is the default
-		String FunctionCharacter (optional)					A delimiter used to identify function name beginnings and ends. If left null, "$" is the default.
+		String FunctionCharacter (optional)						A delimiter used to identify function name beginnings and ends. If left null, "$" is the default.
 
 	The FieldMerge "language" is based on the concept of blocks, functions, operators, and string text. Hereafter, the default OpenDelim, CloseDelim, and FunctionDelim
 	are used in the descriptions.
