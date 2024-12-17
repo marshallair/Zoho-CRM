@@ -13,7 +13,7 @@ fd=FunctionCharacter;                               // just keeping things short
 //
 // Variables
 ResultsMap=Map();									// where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(CurrentDepth=ResultsMap.size()-1)
-LastDelimWasOpen=true;								// We track whether a block delimiter find follows an open or closed delimiter with this
+LastDelimiterWasOpen=true;								// We track whether a block delimiter find follows an open or closed delimiter with this
 SequentialIndex=0;									// width index - starts with 0 for first sequential block, and increases with each successive block
 EmbeddedIndex=0;									// depth index - starts with 0 for first level containing embedded blocks, and increases with each successive block
 Output = "";                                        // string for results
@@ -42,8 +42,7 @@ for each index i in counter {
 		break;
 	}
 	else if(OpenDelimiterLocation>=0) {									// Open Delimiter found
-		if(LastDelimWasOpen) {
-
+		if(LastDelimiterWasOpen) {										// It's an embedded block addition
 			If(Cursor<OpenDelimiterLocation) {							// there is some preceding text - treat as a sequential block starting at 0
 				Index.add(SequentialIndex);								// SequentialIndex always defaults to 0
 				ResultsMap.put(Index,MergeText.mid(cursor,OpenDelimiterLocation));
@@ -52,34 +51,36 @@ for each index i in counter {
 			Index.add(SequentialIndex);
 			ResultsMap.put(Index,BlockType);
 		}
-		else {
-			SequentialIndex=Index.get(Index.size()-1)+1;				// Instead of Increment Function (because Deluge would convert have to text and back)
-			Index.remove(Index.size()-1);
-			Index.add(SequentialIndex);
-			If(Cursor<OpenDelimiterLocation) {							// there is some preceding text - treat as a sequential block starting from SequentialIndex
+		else {															// It's a sequential block addition
+			SequentialIndex=Index.get(Index.size()-1)+1;
+			If(Cursor<OpenDelimiterLocation) {							// there is some preceding text - treat as a completed sequential block starting from SequentialIndex
+				Index.remove(Index.size()-1);
 				Index.add(SequentialIndex);
 				ResultsMap.put(Index,MergeText.mid(cursor,OpenDelimiterLocation));
 				SequentialIndex=SequentialIndex+1;
 			}
-			Index.add(SequentialIndex);									// add block entry into ResultsMap
+			Index.remove(Index.size()-1);								// Get new Index and add incomplete block entry into ResultsMap
+			Index.add(SequentialIndex);
 			ResultsMap.put(Index,BlockType);
-
 		}
-		LastDelimWasOpen=true;
+		LastDelimiterWasOpen=true;
 		Cursor=OpenDelimiterLocation+1;
 	}
 	else if(ClosedDelimiterLocation>=0) {								// Close delimiter found
-		if(LastDelimWasOpen) {											// process what is in ResultsMap at Index.get(Index.size()-1)
+		if(LastDelimiterWasOpen) {										// Complete sequential block (process incomplete block represented in ResultsMap at Index)
 			BlockType=ResultsMap.get(Index);
 			if(BlockType)="BLOCK") {
 				ResultsMap.get(Index)=MergeText.mid(Cursor,ClosedDelimiterLocation);
 			}
 		}
-		else {															// process what is in Index.get( Index.size()-1 - (Index.get(Index.size()-1) ), the previous dimension
-			BlockType=ResultsMap.get(Index.get(Index.size()-1-Index.get(Index.size()-1)));
-
+		else {															// Complete Embedded blocks - process what is in Index.get( Index.size()-1 - (Index.get(Index.size()-1) ), the previous dimension
+			MapCursor=Index.get(Index.size()-1-Index.get(Index.size()-1)); //NEED TO FIGURE OUT THE EASIEST WAY TO TRACK WHERE WE START PROCESSING IF NOT AT THE END OF THE RESULTSMAP!!!!
+			BlockType=ResultsMap.get(MapPointer);
+			if(BlockType)="BLOCK") {
+				ResultsMap.get(Index)=MergeText.mid(Cursor,ClosedDelimiterLocation);
+			}
 		}
- 		LastDelimWasOpen=false;
+ 		LastDelimiterWasOpen=false;
 	}
 }
 // END LOOP
