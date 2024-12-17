@@ -1,0 +1,55 @@
+standalone string ParentBlockValue(string InputMap);
+{
+// standalone.ParentBlock(InputMap)
+// TEST DATA: InputMap='{[0]:"root element"}'; // ,[0,2]:"third sequential element of first embedded level",[0,2,1]:"second sequential element of third sequential element of third embedded level above root",[0,2,1,10]:"fifth sequential element"}';
+m=InputMap.toMap();
+ParentKey = standalone.ParentBlockKey(InputMap).toList();
+if(Isnull(ParentKey)) {
+	return null;
+}
+else {
+	Return m.get(ParentKey);
+}
+}
+//-------------------------------------------------
+standalone string ParentBlockKey(string InputMap);
+{
+// standalone.ParentBlock(InputMap)
+// TEST DATA: InputMap='{[0]:"root element"}'; // ,[0,2]:"third sequential element of first embedded level",[0,2,1]:"second sequential element of third sequential element of third embedded level above root",[0,2,1,10]:"fifth sequential element"}';
+Blocks=InputMap.toMap();
+ParentBlockKey=Blocks.keys();
+if(ParentBlockKey.size()<=1) {
+	Return null;
+}
+else {
+	ParentBlockKey=ParentBlockKey.get(ParentBlockKey.size()-1);
+	ParentBlockKey.remove(ParentBlockKey.size()-1);
+	Return ParentBlockKey;
+}
+}
+//-------------------------------------------------
+standalone string ParentSubIndices(string InputMap);
+{
+// standalone.ResultsMapSubIndices(InputMap)
+// TEST DATA: InputMap='{[0]:"root element",[0,2]:"third sequential element of first embedded level",[0,2,1]:"second sequential element of third sequential element of third embedded level above root",[0,2,1,10]:"fifth sequential element"}';
+ReturnIndices = list();
+ParentKey = InputMap.toMap().keys();  // just using this variable to save space during processing. It's not actually the Parent Key until line 15
+ParentKey = ParentKey.get(ParentKey.size() - 1);
+Iterations = ParentKey.get(ParentKey.size() - 1) + 1;
+if(Iterations = 1) {
+	// to save time
+	return ParentKey;
+	// to save time
+}
+else {
+	ParentKey.remove(ParentKey.size() - 1);
+	TempKey = ParentKey;
+	Counter = leftpad("1",Iterations).replaceAll(" ","1,").toList();
+	for each index i in Counter {
+		TempKey.add(i);
+		ReturnIndices.add(TempKey);
+		TempKey = ParentKey;
+	}
+	return ReturnIndices;
+}
+}

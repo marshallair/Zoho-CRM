@@ -1,95 +1,136 @@
 string standalone.TestStructures(string MergeText, string Data, string OpenDelimiter, string CloseDelimiter, string FunctionCharacter)
 {
+// standalone.TestStructures(MergeText, Data)
+// TERMINOLOGY
+// Block = {}
+// Embedded block = Eblock example -> {{}}
+// Sequential block = Sblock -> {}{}
+// Function = $abc${}
+// Operator examples: {1}+{2}, {true}&&{false}
+//
 // Sample Data
 // MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 // Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
-MergeText=Marshall {Henley {is {the }{best }}{man}{at }my wedding."
+MergeText = "Marshall {Henley {is {the }{best }}{man}{at }my wedding.";
+Data = "";
 // Defaults
-OpenDelimiter=ifnull(OpenDelimiter,"{");
-CloseDelimiter=ifnull(CloseDelimiter,"}");
-FunctionCharacter=ifnull(FunctionCharacter,"$");
-fd=FunctionCharacter;                               // just keeping things short in code
-
+OpenDelimiter = if(OpenDelimiter=="","{",OpenDelimiter);
+CloseDelimiter = if(CloseDelimiter=="","}",CloseDelimiter);
+FunctionCharacter = ifnull(FunctionCharacter,"$");
+fd = FunctionCharacter;
+// just keeping things short in code
 //
 // Variables
-ResultsMap=Map();									// where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(CurrentDepth=ResultsMap.size()-1)
-LastDelimiterWasOpen=true;								// We track whether a block delimiter find follows an open or closed delimiter with this
-SequentialIndex=0;									// width index - starts with 0 for first sequential block, and increases with each successive block
-EmbeddedIndex=0;									// depth index - starts with 0 for first level containing embedded blocks, and increases with each successive block
-Output = "";                                        // string for results
-Cursor=0;                                           // where a cursor for current location within processing of MergeText
-IsArgument=false;                                   // boolean indicating the current pass already has a stack element associated with an argument to be processed
-Index=List();										// ResultsMap index is actually a list
-BlockType="";										// String value containing the current block type prior to evaluation and replacement with results text. Because
-													//	the text inputs and evaluation reside in the evaluation of MergeText until replacing, this allows us to not worry
-													//	about keyword conflicts. We are never checking the value of an unprocessed ResultsMap entry for anything other than
-													//	BlockType until it is completely replaced.
+ResultsMap = Map();
+// where we keep the current variable contexts of all merge info. We "push" and "pop" onto the stack with .add() and .remove(CurrentDepth=ResultsMap.size()-1)
+LastDelimiterWasOpen = true;
+// We track whether a block delimiter find follows an open or closed delimiter; beginning of MergeText is treated as {. End of MergeText is treated as }.
+TextCursor = 0;
+// where a TextCursor for current location within processing of MergeText
+Index = List();
+// ResultsMap index is actually a listMapCursor=List();									// a List used to find ResultsMap entries from 0 to the maximum number of sequential blocks represented as the last sequential entries in ResultsMap// SequentialIndex=0;									// width index - starts with 0 for first sequential block, and increases with each successive block
+Output = "";
+// string for results
+IsArgument = false;
+// boolean indicating the current pass already has a stack element associated with an argument to be processed
+// SequentialIndex=0;								// integer used for the sequential block index
+// BlockType="";									// String value containing the current block type prior to evaluation and replacement with results text.
 //
 // START LOOPING TO FIND FIELDS AND PROCESS
 Index.add(0);
-ResultsMap.put(Index);								// treat the entire string as a block, with an implied block start and end character
-counter = leftpad("1",(MergeText.Len()/4).toLong()).replaceAll(" ","1,").toList();           // the lame Deluge way of creating a counted loop => a list of serialized characters, i starts a 0
-for each index i in counter {
-	// search for either block{} delimiter
-	SequentialIndex=0;			// default each pass
-	BlockType="BLOCK"			// default each pass
-	OpenDelimiterLocation=MergeText.mid(Cursor).find(OpenDelimiter);
-	ClosedDelimiterLocation=MergeText.mid(Cursor).find(CloseDelimiter);
-	if(OpenDelimiterLocation<0 && ClosedDelimiterLocation<0) {			// we're done -> no delimiters found, treat like a closed delimiter was found
-		if(Cursor<MergeText.len()) {
-			Output=Output+MergeText.mid(Cursor);						// tack on what's left
+ResultsMap.put(Index,"BLOCK");
+// treat the entire string as a block, with an implied block start and end character
+counter = leftpad("1",(MergeText.Len() / 4).toLong()).replaceAll(" ","1,").toList();
+// the lame Deluge way of creating a counted loop => a list of serialized characters, i starts a 0
+
+for each index i in counter
+{
+	info "i="+i;
+	info "LastDelimiterWasOpen = "+LastDelimiterWasOpen;
+	// search for either block{} delimiter and set vars for processing
+	SequentialIndex = 0;
+	BlockType = "BLOCK";
+	info MergeText.mid(TextCursor);
+	info OpenDelimiter;
+	OpenDelimiterLocation = MergeText.mid(TextCursor).find(OpenDelimiter);
+	ClosedDelimiterLocation = MergeText.mid(TextCursor).find(CloseDelimiter);
+	NewEblock = OpenDelimiterLocation >= 0 && LastDelimiterWasOpen;
+	NewSblock = OpenDelimiterLocation >= 0 && !LastDelimiterWasOpen;
+	EndSblock = ClosedDelimiterLocation >= 0 && LastDelimiterWasOpen;
+	EndEblock = ClosedDelimiterLocation >= 0 && !LastDelimiterWasOpen;
+	LastDelimiterWasOpen = OpenDelimiterLocation >= 0;
+	info "OpenDelimiterLocation = "+OpenDelimiterLocation;
+	Info "ClosedDelimiterLocation = "+ClosedDelimiterLocation;
+	Info "NewEblock = "+NewEblock;
+	Info "NewSblock = "+NewSblock;
+	Info "EndSblock = "+EndSblock;
+	Info "EndEblock = "+EndEblock;
+	Info "LastDelimiterWasOpen = "+LastDelimiterWasOpen;
+	info "---------------------";
+	// change now for next iteration
+	//
+	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
+	{
+		// we're done -> no delimiters found. Tack on what's left, if anything, as Sblock.
+		if(TextCursor < MergeText.len())
+		{
+			Output = Output + MergeText.mid(TextCursor);
 		}
 		break;
 	}
-	else if(OpenDelimiterLocation>=0) {									// Open Delimiter found
-		if(LastDelimiterWasOpen) {										// It's an embedded block addition
-			If(Cursor<OpenDelimiterLocation) {							// there is some preceding text - treat as a sequential block starting at 0
-				Index.add(SequentialIndex);								// SequentialIndex always defaults to 0
-				ResultsMap.put(Index,MergeText.mid(cursor,OpenDelimiterLocation));
-				SequentialIndex=1;
-			}
-			Index.add(SequentialIndex);
-			ResultsMap.put(Index,BlockType);
+	//
+	else if(NewEblock)
+	{
+		if(TextCursor < OpenDelimiterLocation)
+		{
+			// there is some preceding text - treat as first Eblock preceding current Sblock
+			Index.add(0);
+			ResultsMap.put(Index,MergeText.mid(TextCursor,OpenDelimiterLocation));
+			SequentialIndex = 1;
 		}
-		else {															// It's a sequential block addition
-			SequentialIndex=Index.get(Index.size()-1)+1;
-			If(Cursor<OpenDelimiterLocation) {							// there is some preceding text - treat as a completed sequential block starting from SequentialIndex
-				Index.remove(Index.size()-1);
-				Index.add(SequentialIndex);
-				ResultsMap.put(Index,MergeText.mid(cursor,OpenDelimiterLocation));
-				SequentialIndex=SequentialIndex+1;
-			}
-			Index.remove(Index.size()-1);								// Get new Index and add incomplete block entry into ResultsMap
-			Index.add(SequentialIndex);
-			ResultsMap.put(Index,BlockType);
-		}
-		LastDelimiterWasOpen=true;
-		Cursor=OpenDelimiterLocation+1;
+		Index.add(SequentialIndex);
+		ResultsMap.put(Index,BlockType);
+		TextCursor = OpenDelimiterLocation + 1;
 	}
-	else if(ClosedDelimiterLocation>=0) {								// Close delimiter found
-		if(LastDelimiterWasOpen) {										// Complete sequential block (process incomplete block represented in ResultsMap at Index)
-			BlockType=ResultsMap.get(Index);
-			if(BlockType)="BLOCK") {
-				ResultsMap.get(Index)=MergeText.mid(Cursor,ClosedDelimiterLocation);
+	else if(NewSblock)
+	{
+		if(TextCursor < OpenDelimiterLocation)
+		{
+			// there is some preceding text - treat as a completed Sblock preceding current Sblock
+			Index = standalone.IncrementSequentialIndex(Index).toList(",");
+			ResultsMap.put(Index,MergeText.mid(TextCursor,OpenDelimiterLocation));
+		}
+		Index = standalone.IncrementSequentialIndex(Index).toList(",");
+		ResultsMap.put(Index,BlockType);
+		TextCursor = OpenDelimiterLocation + 1;
+	}
+	else if(EndSblock)
+	{
+		BlockType = ResultsMap.get(Index);
+		if(BlockType == "BLOCK")
+		{
+			ResultsMap.put(Index,MergeText.mid(TextCursor,ClosedDelimiterLocation));
+		}
+		TextCursor = ClosedDelimiterLocation + 1;
+	}
+	else if(EndEblock)
+	{
+		// Complete Embedded blocks - process what is in Index.get( Index.size()-1 - (Index.get(Index.size()-1) ), the previous dimension
+		ParentBlockKey = standalone.ParentBlockKey(ResultsMap);
+		BlockType = standalone.ParentBlockValue(ResultsMap);
+		ResultsMap.put(ParentBlockKey,"");
+		Indices = standalone.ParentSubIndices(ResultsMap).toList(",");
+		info "Indices=" + Indices;
+		if(BlockType = "BLOCK")
+		{
+			// iterate through concatenation of each sub block
+			for each index i in Indices
+			{
+				ResultsMap.put(ParentBlockKey,ResultsMap.get(ParentBlockKey) + ResultsMap.get(i));
 			}
 		}
-		else {															// Complete Embedded blocks - process what is in Index.get( Index.size()-1 - (Index.get(Index.size()-1) ), the previous dimension
-			MapCursor=Index.get(Index.size()-1-Index.get(Index.size()-1)); //NEED TO FIGURE OUT THE EASIEST WAY TO TRACK WHERE WE START PROCESSING IF NOT AT THE END OF THE RESULTSMAP!!!!
-			BlockType=ResultsMap.get(MapPointer);
-			if(BlockType)="BLOCK") {
-				ResultsMap.get(Index)=MergeText.mid(Cursor,ClosedDelimiterLocation);
-			}
-		}
- 		LastDelimiterWasOpen=false;
+		TextCursor = ClosedDelimiterLocation + 1;
 	}
 }
-// END LOOP
-//
-// return function value
-if(!isnull(e)) {
-	return e;
-}
-else {
-	return Output;
-}
+return ResultsMap.get(Index);
 }

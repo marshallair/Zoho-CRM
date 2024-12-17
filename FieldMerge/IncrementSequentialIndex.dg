@@ -1,0 +1,8 @@
+String IncrementSequentialIndex(string strIndex)
+{
+Index=strIndex.toList(",");
+n=Index.get(Index.size()-1).toLong()+1;
+Index.remove(Index.size()-1);
+Index.add(n.toLong());
+Return Index;
+}
