@@ -1,4 +1,4 @@
-String IncrementSequentialIndex(string strIndex)
+String standalone.IncrementSequentialIndex(string strIndex)
 {
 Index=strIndex.toList(",");
 n=Index.get(Index.size()-1).toLong()+1;
