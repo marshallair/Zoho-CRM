@@ -12,128 +12,179 @@ string standalone.TestStructures(String MergeText,String Data,String OpenDelimit
 // Sample Data
 // 	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 // 	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
-	MergeText = "Marshall {Henley {is {the }{best }}{man}{at }my wedding.";
+	// MergeText = "Marshall {Henley {is {the }{best }}{man}{at }my wedding.";
+	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
 	Data = "";
 //
 // // Defaults
 OpenDelimiter = if(OpenDelimiter == "","{",OpenDelimiter);
 CloseDelimiter = if(CloseDelimiter == "","}",CloseDelimiter);
 FunctionCharacter = ifnull(FunctionCharacter,"$");
-fd = FunctionCharacter;
 //
 // Variables
+MergeText=OpenDelimiter+MergeText+CloseDelimiter;
 ResultsMap = Map();
 LastDelimiterWasOpen = true;
 TextCursor = 0;
-Index = List();
+CurrentIndex = List();
 IsArgument = false;
-// SequentialIndex=0;				integer used for the sequential block index
-// BlockType="";					String value containing the current block type prior to evaluation and replacement with results text.
-// MapCursor=List()					a List used to find ResultsMap entries from 0 to the maximum number of sequential blocks represented as the last sequential entries in ResultsMap
-// SequentialIndex=0;				index number used in a series of blocks, sequential blocks (Sblocks) - starts with 0 for first sequential block, and increases with each successive block
+End=MergeText.len()-1;
+BlockType="";
 //
-// START LOOPING TO FIND FIELDS AND PROCESS
-Index.add(0);
-ResultsMap.put(Index,"BLOCK");
-// the lame Deluge way of creating a counted loop => a list of serialized characters, i starts a 0
+// START LOOPING TO FIND FIELDS AND PROCESS (lame way of doing while loops in Deluge - must break to exit)
 counter = leftpad("1",(MergeText.Len() / 4).toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
-	//defaults each loop
-	SequentialIndex = 0;
-	BlockType = "BLOCK";
 	// search for either block{} delimiter and set vars for processing
 	OpenDelimiterLocation = MergeText.mid(TextCursor).find(OpenDelimiter);
 	ClosedDelimiterLocation = MergeText.mid(TextCursor).find(CloseDelimiter);
 	// 
-	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
+	// Process which delimiter was found first and therefore which block type based on last delimiter found
+	if( OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0 )
 	{
-		// we're done -> no delimiters found. Tack on what's left, if anything, as Sblock.
-		if(TextCursor < MergeText.len())
-		{
-			// Output = Output + MergeText.mid(TextCursor);
-		}
+		// THIS SHOULD NEVER HAPPEN DUE TO MergeText=OpenDelimiter+MergeText+CloseDelimiter above
 		break;
 	}
-	// Process which delimiter was found first and therefore which block type based on last delimiter found
-	NewEblock = OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen;
-	NewSblock = OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen;
-	EndSblock = OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen;
-	EndEblock = OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen;
-	info "i=" + i;
-	info MergeText.mid(TextCursor);
-	info OpenDelimiter;
+	else if(OpenDelimiterLocation<0)
+	{
+		// only closed delimiter found
+		EndSblock = LastDelimiterWasOpen;
+		EndEblock = !LastDelimiterWasOpen;
+		NewEblock=false;
+		NewSblock=false;
+	}
+	else if(ClosedDelimiterLocation<0)
+	{
+		// only open delimiter found
+		NewEblock = LastDelimiterWasOpen;
+		NewSblock = !LastDelimiterWasOpen;
+		EndSblock = false;
+		EndEblock = false;
+	}
+	else
+	{
+		// both delimiters found
+		NewEblock = OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen;
+		NewSblock = OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen;
+		EndSblock = OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen;
+		EndEblock = ( ( OpenDelimiterLocation > ClosedDelimiterLocation ) && !LastDelimiterWasOpen );
+	}
+	info "Pass(i) = " + i + "  | Text from TextCursor to end = "+MergeText.mid(TextCursor);
 	info "OpenDelimiterLocation = " + OpenDelimiterLocation;
 	info "ClosedDelimiterLocation = " + ClosedDelimiterLocation;
-	info "NewEblock = " + NewEblock;
-	info "NewSblock = " + NewSblock;
-	info "EndSblock = " + EndSblock;
-	info "EndEblock = " + EndEblock;
-	info "LastDelimiterWasOpen = " + LastDelimiterWasOpen;
-	info "---------------------";
+	if(NewEblock)
+	{
+		info "New EMBEDDED Block, " + "ResultsMap BEFORE processing is: "+ResultsMap;		
+	}
+	if(NewSblock)
+	{
+		info "New SEQUENTIAL Block, " + "ResultsMap BEFORE processing is: "+ResultsMap;	
+	}
+	if(EndEblock)
+	{
+		info "End EMBEDDED Block, " + "ResultsMap BEFORE processing is: "+ResultsMap;	
+	}
+	if(EndSblock)
+	{
+		info "End SEQUENTIAL Block, " + "ResultsMap BEFORE processing is: "+ResultsMap;	
+	}
 	//
 	if(NewEblock)
 	{
+		//default for each new block
+		BlockType = "BLOCK";
 		if(OpenDelimiterLocation > 0)
 		{
-			// there is some preceding text - treat as first Eblock preceding current Sblock
-			Index.add(0);
-			ResultsMap.put(Index,MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
-			SequentialIndex = 1;
+			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
+			CurrentIndex.add(0);
+			// NOTES: Deluge maps with an a list used as key value(s) apparently use an internal pointer or something. We have to "clone" the list to use it. Otherwise,
+			// it changes the map variable when we change the value of CurrentIndex! Use the .duplicate() collection function for this purpose. Also,
+			// without using toList() with this function, occasionally the new index elements are converted to strings (another bug), such as ["0","1"]
+			// instead of [0,1], for example.
+			// Therefore, we always use listvar.duplicate(0).toList() when assigning to a map key.
+			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
+			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+			ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
+			TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		}
-		Index.add(SequentialIndex);
-		ResultsMap.put(Index,BlockType);
-		TextCursor = TextCursor + OpenDelimiterLocation + 1;
+		else
+		{
+			// just add a new level to CurrentIndex
+			CurrentIndex.add(0);
+			ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
+			TextCursor = TextCursor + 1;
+		}
 		LastDelimiterWasOpen = true;
 	}
 	else if(NewSblock)
 	{
+		//default for each new block
+		BlockType = "BLOCK";
 		if(OpenDelimiterLocation > 0)
 		{
 			// there is some preceding text - treat as a completed Sblock preceding current Sblock
-			Index = standalone.IncrementSequentialIndex(Index).toList(",");
-			ResultsMap.put(Index,MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
+			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 		}
-		Index = standalone.IncrementSequentialIndex(Index).toList(",");
-		ResultsMap.put(Index,BlockType);
+		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+		ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		LastDelimiterWasOpen = true;
 	}
 	else if(EndSblock)
 	{
-		BlockType = ResultsMap.get(Index);
+		info "START EndSblock processing -------------";
+		info ResultsMap;
+		info "CurrentIndex = "+CurrentIndex.toList();
+		BlockType = ResultsMap.get(CurrentIndex.toList());
+		info "BlockType = "+BlockType;
+		info "ResultsMap.get(CurrentIndex) = "+ResultsMap.get(CurrentIndex.toList());
 		if(BlockType == "BLOCK")
 		{
-			ResultsMap.put(Index,MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
+			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = "+MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
+			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
 		}
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
+		info "END EndSblock processing -------------";
 	}
 	else if(EndEblock)
 	{
-		// Complete Embedded blocks - process what is in Index.get( Index.size()-1 - (Index.get(Index.size()-1) ), the previous dimension
+		// Complete Embedded blocks - process what is in CurrentIndex.get( CurrentIndex.size()-1 - (CurrentIndex.get(CurrentIndex.size()-1) ), the previous dimension
 		if(ClosedDelimiterLocation > 0)
 		{
 			// there is some ending text - treat as a completed Sblock preceding current Sblock
-			Index = standalone.IncrementSequentialIndex(Index).toList(",");
-			ResultsMap.put(Index,MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
+			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
 		}
-		ParentBlockKey = standalone.ParentBlockKey(ResultsMap);
+		ParentBlockKey = standalone.ParentBlockKey(ResultsMap).toList(",");
+		info "ParentBlockKey: "+ParentBlockKey;
 		BlockType = standalone.ParentBlockValue(ResultsMap);
-		ResultsMap.put(ParentBlockKey,"");
-		Indices = standalone.ParentSubIndices(ResultsMap).toList(",");
-		info "Indices=" + Indices;
+		info "BlockType = "+BlockType;
+		Indices = standalone.ParentSubIndices(ResultsMap).duplicate.toList("|");
+		Info "Indices = "+Indices;
+		info "Processing End Embedded Block. Indices = " + Indices;
 		if(BlockType = "BLOCK")
 		{
+			ResultsMap.put(ParentBlockKey.duplicate().toList(),"");
 			// iterate through concatenation of each sub block
-			for each index i in Indices
+			for each i in Indices
 			{
-				ResultsMap.put(ParentBlockKey,ResultsMap.get(ParentBlockKey) + ResultsMap.get(i));
+				// concatenate at parent level and remove map
+				ResultsMap.put(ParentBlockKey.duplicate().toList(),ResultsMap.get(ParentBlockKey.duplicate().toList()) + ResultsMap.get(i.duplicate().toList()));
 			}
+			// Reset CurrentIndex to "last item" which is now the parent
+			CurrentIndex=ParentBlockKey;
 		}
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
 	}
+	info "ResultsMap AFTER processing is: "+ResultsMap;	
+	info "---------------------";
+	if( TextCursor>=End) {
+		// we're done
+		break;
+	}
 }
-return ResultsMap.get(Index);
+return ResultsMap.get([0]);
 }

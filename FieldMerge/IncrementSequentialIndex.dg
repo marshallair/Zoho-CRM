@@ -1,8 +1,9 @@
 String standalone.IncrementSequentialIndex(string strIndex)
 {
-Index=strIndex.toList(",");
-n=Index.get(Index.size()-1).toLong()+1;
-Index.remove(Index.size()-1);
-Index.add(n.toLong());
-Return Index;
+ResultsIndex=strIndex.toList(",");
+// get value of last element, remove it, and replace it with incremented value, but due to a Deluge bug, need to make sure everthing is converted to Long again
+n=ResultsIndex.get(ResultsIndex.size()-1).toLong()+1;
+ResultsIndex.remove(ResultsIndex.size()-1);
+ResultsIndex.add(n.toLong());
+Return ResultsIndex;
 }

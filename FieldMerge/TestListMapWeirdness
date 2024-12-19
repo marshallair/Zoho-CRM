@@ -1,0 +1,44 @@
+string standalone.TestListMapWeirdness()
+{
+// CHANGING list var CHANGES ALL REFERENCES IN m MAP keys
+m=Map();
+l=list();
+l.add(0);
+m.put(l,"TEST");
+info m;
+l.add(1);
+m.put(l,"TEST");
+info m;
+l.add(0);
+m.put(l,"TEST");
+info m;
+//
+// SO WE USE .duplicate() function...
+m=Map();
+l=list();
+l.add(0);
+m.put(l.duplicate(0),"TEST");
+info m;
+l.add(1);
+m.put(l.duplicate(0),"TEST");
+info m;
+l.add(0);
+m.put(l.duplicate(0),"TEST");
+info m;
+//
+// but when we we call a subfunction, individual elements are changed to strings
+m=Map();
+l=list();
+l.add(0);
+m.put(l.duplicate(0),"TEST");
+info m;
+l.add(1);
+m.put(l.duplicate(0),"TEST");
+info m;
+// use a function call returning a string:
+l=standalone.IncrementSequentialIndex(l).toList();
+m.put(l.duplicate(0),"TEST");
+info m;
+return "";
+
+}
