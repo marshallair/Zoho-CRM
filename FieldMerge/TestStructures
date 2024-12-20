@@ -114,7 +114,6 @@ for each index i in counter
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
 			TextCursor = TextCursor + 1;
 		}
-		LastDelimiterWasOpen = true;
 	}
 	else if(NewSblock)
 	{

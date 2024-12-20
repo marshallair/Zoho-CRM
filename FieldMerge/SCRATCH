@@ -1,0 +1,4 @@
+	else if(OpenDelimiterLocation>ClosedDelimiterLocation&&i==0) {      // Mismatch
+		e={"ERROR","Braces don't match"};
+		break;
+	}

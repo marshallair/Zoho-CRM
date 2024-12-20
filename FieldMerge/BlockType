@@ -1,0 +1,56 @@
+string standalone.BlockType(String MergeText,Int BlockDelimiterLocation,String FunctionCharacter)
+{
+// USAGE:
+// standalone.BlockType(MergeText,OpenDelimiterLocation)
+// standalone.BlockType(MergeText,BlockDelimiterLocation,FunctionCharacter)
+//
+// TEST
+// FunctionName="AND";
+// MergeText="{true}$AND${false}";
+// BlockDelimiterLocation=11;
+// FunctionCharacter="";
+//
+// DEFAULTS
+FunctionCharacter=if(FunctionCharacter=="","$",FunctionCharacter);
+//
+// FUNCTION
+if((upper(MergeText.mid(BlockDelimiterLocation - FunctionName.Len() - (2*FunctionCharacter.len()), BlockDelimiterLocation)) == FunctionCharacter + FunctionName + FunctionCharacter).toString())
+{
+	// logical and
+	return "AND";
+}
+else if(standalone.IsBlockThisFunction("NAND",MergeText,OpenDelimiterLocation,FunctionCharacter))
+{
+	// logical nand function
+	return "NAND";
+}
+else if(standalone.IsBlockThisFunction("OR",MergeText,OpenDelimiterLocation,FunctionCharacter)) {               // logical or function
+}
+else if(standalone.IsBlockThisFunction("NOR",MergeText,OpenDelimiterLocation,FunctionCharacter)) {              // logical nor function
+}			
+else if(standalone.IsBlockThisFunction("XOR",MergeText,OpenDelimiterLocation,FunctionCharacter)) {              // logical Xor function
+}			
+else if(standalone.IsBlockThisFunction("NOT",MergeText,OpenDelimiterLocation,FunctionCharacter)) {              // logical unary not function
+}
+// TEST FOR BINARY and UNARY OPERATORS - ignore preceding text
+else if(standalone.IsBlockThisFunction("+",MergeText,OpenDelimiterLocation,"")) { // add operator
+}
+else if(standalone.IsBlockThisFunction("-",MergeText,OpenDelimiterLocation,"")) { // subtract
+}
+else if(standalone.IsBlockThisFunction("*",MergeText,OpenDelimiterLocation,"")) { // multiply
+}
+else if(standalone.IsBlockThisFunction("**",MergeText,OpenDelimiterLocation,"")) { // raise to power of
+}
+else if(standalone.IsBlockThisFunction("/",MergeText,OpenDelimiterLocation,"")) { // divide
+}
+else if(standalone.IsBlockThisFunction("--",MergeText,OpenDelimiterLocation,"")) { // unary negative
+}
+else if(standalone.IsBlockThisFunction("&&",MergeText,OpenDelimiterLocation,"")) { // and operator
+}
+else if(standalone.IsBlockThisFunction("||",MergeText,OpenDelimiterLocation,"")) { // or operator
+}
+else
+{    
+	return "BLOCK";
+}
+}
