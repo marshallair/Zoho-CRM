@@ -12,7 +12,7 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 // Sample Data
 // 	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 // 	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
-MergeText = "Marshall {Henley {is {the }{best }}{man}{at }my {wedding}.";
+MergeText = "Marshall {Henley {is {the }\}{best$ }}{man }{at }m\{y {wedding}}.";
 // MergeText = "Marshall {Henley {is the best man }}at my wedding.";
 Data = "";
 //
@@ -30,20 +30,26 @@ CurrentIndex = List();
 IsArgument = false;
 End = MergeText.len() - 1;
 BlockType = "";
-ResultText="";
+ResultText = "";
 //
 // START LOOPING TO FIND FIELDS AND PROCESS (lame way of doing while loops in Deluge - must break to exit)
-counter = leftpad("1",(MergeText.Len() / 4).toLong()).replaceAll(" ","1,").toList();
+counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
-	// search for either block{} delimiter and set vars for processing
-	OpenDelimiterLocation = MergeText.mid(TextCursor).find(OpenDelimiter);
-	ClosedDelimiterLocation = MergeText.mid(TextCursor).find(CloseDelimiter);
+	// Use replaceall to ignore escaped delimiters
+	Temp=MergeText.replaceAll('\'+OpenDelimiter,"  ",true);
+	OpenDelimiterLocation = Temp.mid(TextCursor).find(OpenDelimiter);
+	Temp=MergeText.replaceAll('\'+CloseDelimiter,"  ",true);
+	ClosedDelimiterLocation = Temp.mid(TextCursor).find(CloseDelimiter);
 	// 
 	// Process which delimiter was found first and therefore which block type based on last delimiter found
 	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
 	{
 		// THIS SHOULD NEVER HAPPEN DUE TO MergeText=OpenDelimiter+MergeText+CloseDelimiter above
+		info "BREAKING ON DELIMITER NOT FOUND - THIS SHOULD NEVER HAPPEN";
+		info "TextCursor: " + TextCursor;
+		info "OpenDelimiterLocation: " + OpenDelimiterLocation;
+		info "ClosedDelimiterLocation: " + ClosedDelimiterLocation;
 		break;
 	}
 	else if(OpenDelimiterLocation < 0)
@@ -71,6 +77,7 @@ for each index i in counter
 		EndEblock = OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen;
 	}
 	info "Pass(i) = " + i + "  | Text from TextCursor to end = " + MergeText.mid(TextCursor);
+	info "TextCursor = " + TextCursor;
 	info "OpenDelimiterLocation = " + OpenDelimiterLocation;
 	info "ClosedDelimiterLocation = " + ClosedDelimiterLocation;
 	if(NewEblock)
@@ -94,7 +101,7 @@ for each index i in counter
 	{
 		//default for each new block
 		BlockType = "BLOCK";
-//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
+		//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
 		if(OpenDelimiterLocation > 0)
 		{
 			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
@@ -157,7 +164,7 @@ for each index i in counter
 		{
 			// there is some ending text - treat as a completed Sblock preceding current Sblock
 			info "THERE IS SOME REMAINING TEXT AFTER LAST SEQUENTIAL BLOCK EMBEDDED WITHIN THIS BLOCK";
-			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = "+MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
+			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = " + MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList();
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
 			info ResultsMap;
@@ -172,13 +179,13 @@ for each index i in counter
 		{
 			ResultsMap.put(ParentBlockKey.duplicate().toList(),"");
 			// iterate through concatenation of each sub block
-			for each i in Indices
+			for each  x in Indices
 			{
-				info i;
-				info "ResultsMap.get(i.toList()) = "+ResultsMap.get(i.toList());
+				info x;
+				info "ResultsMap.get(x.toList()) = " + ResultsMap.get(x.toList());
 				// concatenate at parent level and remove map
-				ResultsMap.put(ParentBlockKey.toList(),ResultsMap.get(ParentBlockKey.toList()) + ResultsMap.get(i.toList()));
-				ResultsMap.remove(i.toList());
+				ResultsMap.put(ParentBlockKey.toList(),ResultsMap.get(ParentBlockKey.toList()) + ResultsMap.get(x.toList()));
+				ResultsMap.remove(x.toList());
 			}
 			// Reset CurrentIndex to "last item" which is now the parent
 			CurrentIndex = ParentBlockKey;
@@ -187,17 +194,24 @@ for each index i in counter
 		LastDelimiterWasOpen = false;
 	}
 	info "ResultsMap AFTER processing is: " + ResultsMap;
+	info "TextCursor AFTER processing is: " + TextCursor;
+	info "End: " + End;
+	info "i: " + i + " from (" + counter;
 	info "---------------------";
 	if(TextCursor >= End)
 	{
 		// we're done
+		info "BREAKING ON TEXT CURSOR = " + TextCursor;
 		break;
 	}
 }
-ResultText=ResultsMap.get(("[0]").toList());
-if(ResultText=="BLOCK")
+ResultText = ResultsMap.get("[0]".toList());
+if(ResultText == "BLOCK")
 {
-	ResultText="{ERROR:\"001 MISMATCHED BRACKETS\"}";
+	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
+}
+else{
+	ResultText=standalone.EscapeAllCharacters(ResultText,OpenDelimiter+CloseDelimiter+FunctionCharacter);
 }
 return ResultText;
 }

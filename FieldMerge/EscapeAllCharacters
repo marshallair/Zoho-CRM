@@ -1,0 +1,26 @@
+string standalone.EscapeAllCharacters(String Text, String CharactersToEscape)
+{
+// USAGE:
+// standalone.EscapeAllCharacters(String,CharactersToEscape)
+//
+// TEST
+// Text="TEST ${}\$\{\}DATA";
+// CharactersToEscape="${}";
+//
+// DEFAULTS
+CharactersToEscape=if(CharactersToEscape=="","${}",CharactersToEscape);
+//
+// FUNCTION
+n=CharactersToEscape.len();
+looper = Leftpad("1",n).replaceAll(" ","1,").toList();
+/*THIS IS FUNCTIONALLY A WHILE BUT ONLY IF looper contains at least as many items as you need to evaluate your series. It maxes out with n=66665. It may max out at a lower number with more code. and returns the following error:
+	Failed to execute function
+	The limit of Statement has reached its maximum 200000 Line Number:13
+*/
+for each index i in looper
+{
+    Char=CharactersToEscape.mid(i,i+1);
+    Text=Text.ReplaceAll('\'+Char,Char,true);
+}
+Return Text;
+}

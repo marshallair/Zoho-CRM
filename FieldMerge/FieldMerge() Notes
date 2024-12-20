@@ -37,10 +37,12 @@ All list entries have a prefix, like PREFIX|: where the |: is ignored, but forms
 
 Order of development and testing:
 x  BLOCK {}
-  DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
+x  DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
   FIELD ${} or $F${}
-    just field name
-    with EVAL_IF_NULL_OR_ERROR block
+    just field name (Sblock1), auto assign next two blocks to {$} and "" before finding out if they contain values
+    with EVAL_IF_NOT_NULL_OR_ERROR block (missing or Sblock2)- can use just {$} for field value {$$} for field name or {$$$} for field value preceded with label, colon, and space => FieldName: FieldValue
+    with EVAL_IF_NULL_OR_ERROR block (missing or Sblock3)
+
   AND{}
   OR{}
   && operator
