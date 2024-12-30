@@ -10,7 +10,7 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 //	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 //	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
 //	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
-MergeText = "Marshall {Henley {is {the }\\}{best$ }}{man }\n{at }m\\{y {wedding}}.";
+// MergeText = "Marshall {Henley {is {the }\}\${best\$ }}{man }\n{at }m\{y {wedding}}.";
 Data = "";
 //
 // DEFAULTS:
@@ -210,5 +210,5 @@ if(ResultText == "BLOCK")
 {
 	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
 }
-return standalone.EscapeAllCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
+return standalone.EscapeSpecialCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
 }

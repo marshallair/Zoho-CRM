@@ -1,0 +1,33 @@
+string standalone.PreProcessEscapeChars(String Text)
+{
+// USAGE:
+//  standalone.PreProcessEscapeChars(Text)
+//  NOTES:
+//
+// TEST:
+//  Parameter1="TEST DATA";
+//  Parameter2=null;
+//
+// DEFAULTS:
+//
+// FUNCTION:
+//  Variables
+StandardEscapes=list();
+StandardEscapes.add("\t");
+StandardEscapes.add("\n");
+StandardEscapes.add('\"');
+StandardEscapes.add("\'");
+StandardEscapes.add("\\");
+//
+// mark each occurrence of standard 
+for each item in StandardEscapes
+{
+    Text=Text.replaceall(item,"(#(#(@(#(@(#"+item.right(1)+"(@#))@)(@#))@");
+}
+text=Text.replaceAll("\","\\");
+for each item in StandardEscapes
+{
+    Text=text.replaceall("(#(#(@(#(@(#"+item.right(1)+"(@#))@)(@#))@",item);
+}
+return Text;
+}
