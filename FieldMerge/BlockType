@@ -23,7 +23,7 @@ else if(standalone.IsBlockThisFunction("NAND",MergeText,OpenDelimiterLocation,Fu
 {
 	// logical nand function
 	return "NAND";
-}
+}d
 else if(standalone.IsBlockThisFunction("OR",MergeText,OpenDelimiterLocation,FunctionCharacter)) {               // logical or function
 }
 else if(standalone.IsBlockThisFunction("NOR",MergeText,OpenDelimiterLocation,FunctionCharacter)) {              // logical nor function

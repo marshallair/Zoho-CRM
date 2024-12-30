@@ -1,14 +1,16 @@
 string standalone.FuncName(String Parameter1, Int Parameter2)
 {
 // USAGE:
-// standalone.FuncName(Parameter1)
-// standalone.FuncName(Parameter2)
+//  standalone.FuncName(Parameter1)
+//  standalone.FuncName(Parameter2)
+//  NOTES:
 //
-// TEST
-// Parameter1="TEST DATA";
-// Parameter2=null;
+// TEST:
+//  Parameter1="TEST DATA";
+//  Parameter2=null;
 //
-// DEFAULTS
+// DEFAULTS:
 Parameter2=ifnull(Parameter2,0);
 //
-// FUNCTION
+// FUNCTION:
+//  Variables

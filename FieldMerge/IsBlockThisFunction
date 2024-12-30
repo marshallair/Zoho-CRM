@@ -1,15 +1,15 @@
-string standalone.IsBlockThisFunction(String FunctionName,String MergeText,Int BlockDelimiterLocation,String FunctionCharacter)
+string standalone.IsBlockThisFunction(String FunctionName,String MergeText,String FunctionCharacter,Int BlockDelimiterLocation)
 {
 	// standalone.IsBlockThisFunction(FunctionName,MergeText,BlockDelimiterLocation,FunctionCharacter)
 	//
 	// Test Data
 	// FunctionName="AND";
-	// MergeText="{true}AND{false}";
+	// MergeText="{true}$AND${false}";
 	// BlockDelimiterLocation=null;
-	// FunctionCharacter="";
+	// FunctionCharacter="$";
 	// Defaults
 	BlockDelimiterLocation=ifnull(BlockDelimiterLocation,0);
-	FunctionCharacter=if(FunctionCharacter="","$",FunctionCharacter);
+	// FunctionCharacter blank allows evaluation of operators
 	//
 	// Process
 	return (upper(MergeText.mid(BlockDelimiterLocation - FunctionName.Len() - (2*FunctionCharacter.len()), BlockDelimiterLocation)) == FunctionCharacter + FunctionName + FunctionCharacter).toString();

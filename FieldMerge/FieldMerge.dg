@@ -1,26 +1,24 @@
 string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,String CloseDelimiter,String FunctionCharacter)
 {
-// standalone.TestStructures(MergeText, Data)
-//
-// TERMINOLOGY
-// 	Block = {}
-// 	Embedded block = Eblock example -> {{}}
-// 	Sequential block = Sblock -> {}{}
-// 	Function = $abc${}
-// 	Operator examples: {1}+{2}, {true}&&{false}
-//
-// Sample Data
-// 	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
-// 	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
-MergeText = "Marshall {Henley {is {the }\}{best$ }}{man }{at }m\{y {wedding}}.";
-// MergeText = "Marshall {Henley {is the best man }}at my wedding.";
+// USAGE:
+//	standalone.FieldMerge(MergeText,Data,null,null,null)
+//	standalone.FieldMerge(MergeText,Data,OpenDelimiter,CloseDelimiter,FunctionCharacter)
+//  NOTE: MergeText requires double escapes (\\) for delimiters (e.g. \\{ ) and function character (e.g \\$) if trying to use as literal
+// 		characters, AND if Zoho has turned on \n for your instance of CRM. Not needed if you haven't requested \n to be turned on.
+//		The reason for this is that Deluge with escaped strings turned on only recognizes \\, \t, \n, \", and \'//
+// TEST:
+//	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
+//	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
+//	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
+MergeText = "Marshall {Henley {is {the }\\}{best$ }}{man }\n{at }m\\{y {wedding}}.";
 Data = "";
 //
-// // Defaults
+// DEFAULTS:
 OpenDelimiter = if(OpenDelimiter == "","{",OpenDelimiter);
 CloseDelimiter = if(CloseDelimiter == "","}",CloseDelimiter);
 FunctionCharacter = ifnull(FunctionCharacter,"$");
 //
+// FUNCTION:
 // Variables
 MergeText = OpenDelimiter + MergeText + CloseDelimiter;
 ResultsMap = Map();
@@ -37,9 +35,9 @@ counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
 	// Use replaceall to ignore escaped delimiters
-	Temp=MergeText.replaceAll('\'+OpenDelimiter,"  ",true);
+	Temp = MergeText.replaceAll('\' + OpenDelimiter,"  ",true);
 	OpenDelimiterLocation = Temp.mid(TextCursor).find(OpenDelimiter);
-	Temp=MergeText.replaceAll('\'+CloseDelimiter,"  ",true);
+	Temp = MergeText.replaceAll('\' + CloseDelimiter,"  ",true);
 	ClosedDelimiterLocation = Temp.mid(TextCursor).find(CloseDelimiter);
 	// 
 	// Process which delimiter was found first and therefore which block type based on last delimiter found
@@ -71,6 +69,8 @@ for each index i in counter
 	else
 	{
 		// both delimiters found
+		BlockProcess = if(OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen,1,if(OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen,2,if(OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen,3,if(OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen,4,null))));
+		//
 		NewEblock = OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen;
 		NewSblock = OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen;
 		EndSblock = OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen;
@@ -210,8 +210,5 @@ if(ResultText == "BLOCK")
 {
 	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
 }
-else{
-	ResultText=standalone.EscapeAllCharacters(ResultText,OpenDelimiter+CloseDelimiter+FunctionCharacter);
-}
-return ResultText;
+return standalone.EscapeAllCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
 }
