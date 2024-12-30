@@ -29,15 +29,19 @@ IsArgument = false;
 End = MergeText.len() - 1;
 BlockType = "";
 ResultText = "";
+NewEblock = 1;
+NewSblock = 2;
+EndSblock = 3;
+EndEblock = 4;
 //
 // START LOOPING TO FIND FIELDS AND PROCESS (lame way of doing while loops in Deluge - must break to exit)
 counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
 	// Use replaceall to ignore escaped delimiters
-	Temp = MergeText.replaceAll('\' + OpenDelimiter,"  ",true);
+	Temp = MergeText.replaceAll('\' + OpenDelimiter,"  ",false);
+	Temp = MergeText.replaceAll('\' + CloseDelimiter,"  ",false);
 	OpenDelimiterLocation = Temp.mid(TextCursor).find(OpenDelimiter);
-	Temp = MergeText.replaceAll('\' + CloseDelimiter,"  ",true);
 	ClosedDelimiterLocation = Temp.mid(TextCursor).find(CloseDelimiter);
 	// 
 	// Process which delimiter was found first and therefore which block type based on last delimiter found
@@ -53,51 +57,26 @@ for each index i in counter
 	else if(OpenDelimiterLocation < 0)
 	{
 		// only closed delimiter found
-		EndSblock = LastDelimiterWasOpen;
-		EndEblock = !LastDelimiterWasOpen;
-		NewEblock = false;
-		NewSblock = false;
+		BlockProcess = if(LastDelimiterWasOpen,3,4);
 	}
 	else if(ClosedDelimiterLocation < 0)
 	{
 		// only open delimiter found
-		NewEblock = LastDelimiterWasOpen;
-		NewSblock = !LastDelimiterWasOpen;
-		EndSblock = false;
-		EndEblock = false;
+		BlockProcess = if(LastDelimiterWasOpen,1,2);
 	}
 	else
 	{
 		// both delimiters found
 		BlockProcess = if(OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen,1,if(OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen,2,if(OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen,3,if(OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen,4,null))));
-		//
-		NewEblock = OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen;
-		NewSblock = OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen;
-		EndSblock = OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen;
-		EndEblock = OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen;
 	}
 	info "Pass(i) = " + i + "  | Text from TextCursor to end = " + MergeText.mid(TextCursor);
 	info "TextCursor = " + TextCursor;
 	info "OpenDelimiterLocation = " + OpenDelimiterLocation;
 	info "ClosedDelimiterLocation = " + ClosedDelimiterLocation;
-	if(NewEblock)
-	{
-		info "New EMBEDDED Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
-	if(NewSblock)
-	{
-		info "New SEQUENTIAL Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
-	if(EndEblock)
-	{
-		info "End EMBEDDED Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
-	if(EndSblock)
-	{
-		info "End SEQUENTIAL Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
+	info "BlockProcess = "+BlockProcess;
+
 	//
-	if(NewEblock)
+	if(BlockProcess==NewEblock)
 	{
 		//default for each new block
 		BlockType = "BLOCK";
@@ -125,7 +104,7 @@ for each index i in counter
 		}
 		LastDelimiterWasOpen = true;
 	}
-	else if(NewSblock)
+	else if(BlockProcess==NewSblock)
 	{
 		//default for each new block
 		BlockType = "BLOCK";
@@ -140,7 +119,7 @@ for each index i in counter
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		LastDelimiterWasOpen = true;
 	}
-	else if(EndSblock)
+	else if(BlockProcess==EndSblock)
 	{
 		info "START EndSblock processing -------------";
 		info ResultsMap;
@@ -157,7 +136,7 @@ for each index i in counter
 		LastDelimiterWasOpen = false;
 		info "END EndSblock processing -------------";
 	}
-	else if(EndEblock)
+	else if(BlockProcess==EndEblock)
 	{
 		// Complete Embedded blocks - process what is in CurrentIndex.get( CurrentIndex.size()-1 - (CurrentIndex.get(CurrentIndex.size()-1) ), the previous dimension
 		if(ClosedDelimiterLocation > 0)
