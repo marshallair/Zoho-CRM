@@ -22,13 +22,13 @@ the following seems to work... .duplicate().toList().
 
 To track where we are within processing, we detect open and closed curly braces, and decide whether they follow an previous open or closed brace
 (the MergeText field is defaulted to have a curly brace to open and close it during processing):
-  - If { is preceded by {, then add a dimension of value 0 (add an element 0 to Index and use new Index to create a new ResultsMap entry)
-  - If { is preceded by }, then increment the value of the dimension (xn=xn+1) and assign that value to a new ResultsMap entry.
-  - If } is preceded by {, then process what is in the MapResults contained at current Index value
-  - If } is preceded by }, then, process what is in MapResults contained at the Index value one dimension less than the current value. This provides
-    for processing of functions with arguments, or even blocks containing expressioins, because each of the previous elements at dimension n-1 are stored in
-    ResultsMap at dimension n, or n:x, (Index y1,y2,yn-1,x), where x for each Map pair index value is a different value. These can easily be processed in order,
-    and the default operation is simple concatenation.
+	- If { is preceded by {, then add a dimension of value 0 (add an element 0 to Index and use new Index to create a new ResultsMap entry)
+	- If { is preceded by }, then increment the value of the dimension (xn=xn+1) and assign that value to a new ResultsMap entry.
+	- If } is preceded by {, then process what is in the MapResults contained at current Index value
+	- If } is preceded by }, then, process what is in MapResults contained at the Index value one dimension less than the current value. This provides
+		for processing of functions with arguments, or even blocks containing expressioins, because each of the previous elements at dimension n-1 are stored in
+		ResultsMap at dimension n, or n:x, (Index y1,y2,yn-1,x), where x for each Map pair index value is a different value. These can easily be processed in order,
+		and the default operation is simple concatenation.
 
 Loop for blocks, process opening of blocks for functions, then pre-load stack with function name then function arguments
 For closing blocks, check for function arguments and process as directed
@@ -38,21 +38,22 @@ All list entries have a prefix, like PREFIX|: where the |: is ignored, but forms
 Order of development and testing:
 x  BLOCK {}
 x  DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
-   Refactor for BlockProcess variable = 1...4
-   Inside loop, refactor code with:
-     PreprocessBlockType(MergeText,OpenDelimLoc,Index) function returning a map with, for an example IF block at 0,1,3: {"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}} to pre-load next set of processing
-     PostProcessBlockType(MergeText,OpenDelimLoc,Index) function that evaluates the BlockTypes above, as in ProcessFunc(BlockType,ResultsMap,Index)
-  FIELD ${} or $F${}
-    just field name (Sblock1), auto assign next two blocks to {$} and "" before finding out if they contain values
-    with EVAL_IF_NOT_NULL_OR_ERROR block (missing or Sblock2)- can use just {$} for field value {$$} for field name or {$$$} for field value preceded with label, colon, and space => FieldName: FieldValue
-    with EVAL_IF_NULL_OR_ERROR block (missing or Sblock3)
+x  Refactor for BlockProcess variable = 1...4
+		Fix Escaped Characters on return - double-check the use of true in replaceAll functions - this should likely be false in every case.
+		Inside loop, refactor code with:
+		PreprocessBlockType(MergeText,OpenDelimLoc,Index) function returning a map with, for an example IF block at 0,1,3: {"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}} to pre-load next set of processing
+		PostProcessBlockType(MergeText,OpenDelimLoc,Index) function that evaluates the BlockTypes above, as in ProcessFunc(BlockType,ResultsMap,Index)
+	FIELD ${} or $F${}
+		just field name (Sblock1), auto assign next two blocks to {$} and "" before finding out if they contain values
+		with EVAL_IF_NOT_NULL_OR_ERROR block (missing or Sblock2)- can use just {$} for field value {$$} for field name or {$$$} for field value preceded with label, colon, and space => FieldName: FieldValue
+		with EVAL_IF_NULL_OR_ERROR block (missing or Sblock3)
 
-  AND{}
-  OR{}
-  && operator
-  || operator
-  + operator
-  -- unary negative operator (can I do single - and detect somehow?)
-  IIF{}
-  ALL functions
-  ALL operators
+	AND{}
+	OR{}
+	&& operator
+	|| operator
+	+ operator
+	-- unary negative operator (can I do single - and detect somehow?)
+	IIF{}
+	ALL functions
+	ALL operators

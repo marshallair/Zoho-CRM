@@ -20,7 +20,7 @@ looper = Leftpad("1",n).replaceAll(" ","1,").toList();
 for each index i in looper
 {
     Char=CharactersToEscape.mid(i,i+1);
-    Text=Text.ReplaceAll('\'+Char,Char,true);
+    Text=Text.ReplaceAll('\'+Char,Char,false);
 }
 Return Text;
 }

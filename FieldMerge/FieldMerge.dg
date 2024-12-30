@@ -10,7 +10,8 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 //	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 //	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
 //	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
-// MergeText = "Marshall {Henley {is {the }\}\${best\$ }}{man }\n{at }m\{y {wedding}}.";
+// MergeText = "Marshall {Henley {is {the }}\${best\$ }}{man }\\n{at }m\{y {wedding}}.";
+// MergeText = "Marshall Henley {is the }\${best}{man }\n{at }my {wedding}.";
 Data = "";
 //
 // DEFAULTS:
@@ -73,10 +74,9 @@ for each index i in counter
 	info "TextCursor = " + TextCursor;
 	info "OpenDelimiterLocation = " + OpenDelimiterLocation;
 	info "ClosedDelimiterLocation = " + ClosedDelimiterLocation;
-	info "BlockProcess = "+BlockProcess;
-
+	info "BlockProcess = " + BlockProcess;
 	//
-	if(BlockProcess==NewEblock)
+	if(BlockProcess == NewEblock)
 	{
 		//default for each new block
 		BlockType = "BLOCK";
@@ -92,7 +92,7 @@ for each index i in counter
 			// Therefore, we always use listvar.duplicate(0).toList() when assigning to a map key.
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
-			ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
+			ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
 			TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		}
 		else
@@ -104,7 +104,7 @@ for each index i in counter
 		}
 		LastDelimiterWasOpen = true;
 	}
-	else if(BlockProcess==NewSblock)
+	else if(BlockProcess == NewSblock)
 	{
 		//default for each new block
 		BlockType = "BLOCK";
@@ -119,7 +119,7 @@ for each index i in counter
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		LastDelimiterWasOpen = true;
 	}
-	else if(BlockProcess==EndSblock)
+	else if(BlockProcess == EndSblock)
 	{
 		info "START EndSblock processing -------------";
 		info ResultsMap;
@@ -136,7 +136,7 @@ for each index i in counter
 		LastDelimiterWasOpen = false;
 		info "END EndSblock processing -------------";
 	}
-	else if(BlockProcess==EndEblock)
+	else if(BlockProcess == EndEblock)
 	{
 		// Complete Embedded blocks - process what is in CurrentIndex.get( CurrentIndex.size()-1 - (CurrentIndex.get(CurrentIndex.size()-1) ), the previous dimension
 		if(ClosedDelimiterLocation > 0)
@@ -189,5 +189,6 @@ if(ResultText == "BLOCK")
 {
 	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
 }
+info ResultText;
 return standalone.EscapeSpecialCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
 }
