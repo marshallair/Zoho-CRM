@@ -92,7 +92,7 @@ for each index i in counter
 			// Therefore, we always use listvar.duplicate(0).toList() when assigning to a map key.
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
-			ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
+			ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
 			TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		}
 		else
