@@ -8,7 +8,7 @@ string standalone.EscapeSpecialCharacters(String Text,String CharactersToEscape)
 // CharactersToEscape="${}";
 //
 // DEFAULTS
-CharactersToEscape = if(CharactersToEscape == "","${}",CharactersToEscape);
+CharactersToEscape = ifnull(CharactersToEscape,"${}");
 //
 // FUNCTION
 n = CharactersToEscape.len() + 1;
