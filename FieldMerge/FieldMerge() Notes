@@ -36,18 +36,17 @@ For closing blocks, check for function arguments and process as directed
 All list entries have a prefix, like PREFIX|: where the |: is ignored, but forms a delimiter
 
 Order of development and testing:
-x  BLOCK {}
-x  DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
-x  Refactor for BlockProcess variable = 1...4
-		Fix Escaped Characters on return - double-check the use of true in replaceAll functions - this should likely be false in every case.
-		Inside loop, refactor code with:
+x	BLOCK {}
+x	DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
+x	Refactor for BlockProcess variable = 1...4
+x	Fix Escaped Characters on return - double-check the use of true in replaceAll functions - this should likely be TRUE in every case.
+	Inside loop, refactor code with:
 		PreprocessBlockType(MergeText,OpenDelimLoc,Index) function returning a map with, for an example IF block at 0,1,3: {"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}} to pre-load next set of processing
 		PostProcessBlockType(MergeText,OpenDelimLoc,Index) function that evaluates the BlockTypes above, as in ProcessFunc(BlockType,ResultsMap,Index)
 	FIELD ${} or $F${}
 		just field name (Sblock1), auto assign next two blocks to {$} and "" before finding out if they contain values
 		with EVAL_IF_NOT_NULL_OR_ERROR block (missing or Sblock2)- can use just {$} for field value {$$} for field name or {$$$} for field value preceded with label, colon, and space => FieldName: FieldValue
 		with EVAL_IF_NULL_OR_ERROR block (missing or Sblock3)
-
 	AND{}
 	OR{}
 	&& operator
