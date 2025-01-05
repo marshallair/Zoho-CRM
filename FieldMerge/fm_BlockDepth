@@ -1,0 +1,4 @@
+string standalone.BlockDepth(Text)
+{
+Return BlockDepth.toString();
+}

@@ -1,0 +1,5 @@
+string standalone.SequentialBlockCount(String Text, String OpenDelimiter, String CloseDelimiter)
+// assumes first character of Text is the first character of the block current block, immediately after the OpenDelimiter)
+{
+Return BlockCount.toString();
+}
