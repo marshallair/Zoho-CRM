@@ -9,95 +9,72 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 // TEST:
 //	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 //	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
-//	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
-// MergeText = "Marshall {Henley {is {the }\}\${best\$ }}{man }\n{at }m\{y {wedding}}.";
+// 	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
+MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wedding}.";
+//	MergeText = "Marshall Henley {is the }{best}";
 Data = "";
 //
 // DEFAULTS:
-OpenDelimiter = if(OpenDelimiter == "","{",OpenDelimiter);
-CloseDelimiter = if(CloseDelimiter == "","}",CloseDelimiter);
+OpenDelimiter = if(isnull(OpenDelimiter),"{",OpenDelimiter);
+CloseDelimiter = if(isnull(CloseDelimiter),"}",CloseDelimiter);
 FunctionCharacter = ifnull(FunctionCharacter,"$");
 //
 // FUNCTION:
 // Variables
 MergeText = OpenDelimiter + MergeText + CloseDelimiter;
+info "MergeText: " + MergeText;
 ResultsMap = Map();
 LastDelimiterWasOpen = true;
 TextCursor = 0;
 CurrentIndex = List();
 IsArgument = false;
 End = MergeText.len() - 1;
-BlockType = "";
 ResultText = "";
+NewEblock = 1;
+NewSblock = 2;
+EndSblock = 3;
+EndEblock = 4;
+// BlockProcess=1;
+//
 //
 // START LOOPING TO FIND FIELDS AND PROCESS (lame way of doing while loops in Deluge - must break to exit)
 counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
 	// Use replaceall to ignore escaped delimiters
-	Temp = MergeText.replaceAll('\' + OpenDelimiter,"  ",true);
-	OpenDelimiterLocation = Temp.mid(TextCursor).find(OpenDelimiter);
-	Temp = MergeText.replaceAll('\' + CloseDelimiter,"  ",true);
-	ClosedDelimiterLocation = Temp.mid(TextCursor).find(CloseDelimiter);
+	Temp = MergeText.mid(TextCursor).replaceAll('\' + OpenDelimiter,"__",true);
+	Temp = Temp.replaceAll('\' + CloseDelimiter,"__",true);
+	OpenDelimiterLocation = Temp.find(OpenDelimiter);
+	ClosedDelimiterLocation = Temp.find(CloseDelimiter);
+	//
+	info "Pass(i): " + i + " of " + End + " , TextCursor: " + TextCursor + " , OpenDelimiterLocation: " + OpenDelimiterLocation + " , ClosedDelimiterLocation: " + ClosedDelimiterLocation;
+	info "Text from TextCursor to end: " + MergeText.mid(TextCursor);
 	// 
 	// Process which delimiter was found first and therefore which block type based on last delimiter found
 	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
 	{
 		// THIS SHOULD NEVER HAPPEN DUE TO MergeText=OpenDelimiter+MergeText+CloseDelimiter above
 		info "BREAKING ON DELIMITER NOT FOUND - THIS SHOULD NEVER HAPPEN";
-		info "TextCursor: " + TextCursor;
-		info "OpenDelimiterLocation: " + OpenDelimiterLocation;
-		info "ClosedDelimiterLocation: " + ClosedDelimiterLocation;
 		break;
 	}
 	else if(OpenDelimiterLocation < 0)
 	{
 		// only closed delimiter found
-		EndSblock = LastDelimiterWasOpen;
-		EndEblock = !LastDelimiterWasOpen;
-		NewEblock = false;
-		NewSblock = false;
+		BlockProcess = if(LastDelimiterWasOpen,3,4);
 	}
 	else if(ClosedDelimiterLocation < 0)
 	{
 		// only open delimiter found
-		NewEblock = LastDelimiterWasOpen;
-		NewSblock = !LastDelimiterWasOpen;
-		EndSblock = false;
-		EndEblock = false;
+		BlockProcess = if(LastDelimiterWasOpen,1,2);
 	}
 	else
 	{
 		// both delimiters found
 		BlockProcess = if(OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen,1,if(OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen,2,if(OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen,3,if(OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen,4,null))));
-		//
-		NewEblock = OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen;
-		NewSblock = OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen;
-		EndSblock = OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen;
-		EndEblock = OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen;
 	}
-	info "Pass(i) = " + i + "  | Text from TextCursor to end = " + MergeText.mid(TextCursor);
-	info "TextCursor = " + TextCursor;
-	info "OpenDelimiterLocation = " + OpenDelimiterLocation;
-	info "ClosedDelimiterLocation = " + ClosedDelimiterLocation;
-	if(NewEblock)
-	{
-		info "New EMBEDDED Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
-	if(NewSblock)
-	{
-		info "New SEQUENTIAL Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
-	if(EndEblock)
-	{
-		info "End EMBEDDED Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
-	if(EndSblock)
-	{
-		info "End SEQUENTIAL Block, " + "ResultsMap BEFORE processing is: " + ResultsMap;
-	}
+	info "BlockProcess: " + if(BlockProcess == 1,"NewEblock",if(BlockProcess == 2,"NewSblock",if(BlockProcess == 3,"EndSblock",if(BlockProcess == 4,"EndEblock","ERROR IN BlockProcess (not equal to 1,2,3 or 4)")))) + " , OpenDelimiterLocation: " + OpenDelimiterLocation + " , ClosedDelimiterLocation: " + ClosedDelimiterLocation;
 	//
-	if(NewEblock)
+	if(BlockProcess == NewEblock)
 	{
 		//default for each new block
 		BlockType = "BLOCK";
@@ -106,11 +83,10 @@ for each index i in counter
 		{
 			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
 			CurrentIndex.add(0);
-			// NOTES: Deluge maps with an a list used as key value(s) apparently use an internal pointer or something. We have to "clone" the list to use it. Otherwise,
-			// it changes the map variable when we change the value of CurrentIndex! Use the .duplicate() collection function for this purpose. Also,
-			// without using toList() with this function, occasionally the new index elements are converted to strings (another bug), such as ["0","1"]
-			// instead of [0,1], for example.
-			// Therefore, we always use listvar.duplicate(0).toList() when assigning to a map key.
+			// NOTE: Deluge maps with an a list used as key value(s) apparently use an internal pointer or something. We have to "clone" the list to use it using duplicate().
+			// Otherwise, it changes the map variable when we change the value of CurrentIndex! Also, without using toList() with this function, occasionally the new index
+			// elements are converted to strings (another bug), such as ["0","1"] instead of [0,1], for example. Therefore, we always use listvar.duplicate(0).toList() 
+			// when assigning a list to a map key...
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
 			ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
@@ -125,7 +101,7 @@ for each index i in counter
 		}
 		LastDelimiterWasOpen = true;
 	}
-	else if(NewSblock)
+	else if(BlockProcess == NewSblock)
 	{
 		//default for each new block
 		BlockType = "BLOCK";
@@ -140,7 +116,7 @@ for each index i in counter
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		LastDelimiterWasOpen = true;
 	}
-	else if(EndSblock)
+	else if(BlockProcess == EndSblock)
 	{
 		info "START EndSblock processing -------------";
 		info ResultsMap;
@@ -157,7 +133,7 @@ for each index i in counter
 		LastDelimiterWasOpen = false;
 		info "END EndSblock processing -------------";
 	}
-	else if(EndEblock)
+	else if(BlockProcess == EndEblock)
 	{
 		// Complete Embedded blocks - process what is in CurrentIndex.get( CurrentIndex.size()-1 - (CurrentIndex.get(CurrentIndex.size()-1) ), the previous dimension
 		if(ClosedDelimiterLocation > 0)
@@ -194,14 +170,11 @@ for each index i in counter
 		LastDelimiterWasOpen = false;
 	}
 	info "ResultsMap AFTER processing is: " + ResultsMap;
-	info "TextCursor AFTER processing is: " + TextCursor;
-	info "End: " + End;
-	info "i: " + i + " from (" + counter;
-	info "---------------------";
-	if(TextCursor >= End)
+	info "TextCursor AFTER processing is: " + TextCursor + " , End: " + End;
+	if(TextCursor > End)
 	{
 		// we're done
-		info "BREAKING ON TEXT CURSOR = " + TextCursor;
+		info "!!! BREAKING ON TEXT CURSOR = " + TextCursor;
 		break;
 	}
 }
@@ -210,5 +183,6 @@ if(ResultText == "BLOCK")
 {
 	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
 }
+info ResultText;
 return standalone.EscapeSpecialCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
 }

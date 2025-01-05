@@ -1,17 +1,17 @@
-string standalone.EscapeSpecialCharacters(String Text, String CharactersToEscape)
+string standalone.EscapeSpecialCharacters(String Text,String CharactersToEscape)
 {
 // USAGE:
-// standalone.EscapeSpecialCharacters(String,CharactersToEscape)
+// standalone.ExcapeSpecialCharacters(String,CharactersToEscape)
 //
 // TEST
-// Text="TEST ${}\$\{\}DATA";
+// Text = "TEST \$\{\} DATA";
 // CharactersToEscape="${}";
 //
 // DEFAULTS
-CharactersToEscape=if(CharactersToEscape=="","${}",CharactersToEscape);
+CharactersToEscape = ifnull(CharactersToEscape,"${}");
 //
 // FUNCTION
-n=CharactersToEscape.len();
+n = CharactersToEscape.len() + 1;
 looper = Leftpad("1",n).replaceAll(" ","1,").toList();
 /*THIS IS FUNCTIONALLY A WHILE BUT ONLY IF looper contains at least as many items as you need to evaluate your series. It maxes out with n=66665. It may max out at a lower number with more code. and returns the following error:
 	Failed to execute function
@@ -19,8 +19,8 @@ looper = Leftpad("1",n).replaceAll(" ","1,").toList();
 */
 for each index i in looper
 {
-    Char=CharactersToEscape.mid(i,i+1);
-    Text=Text.ReplaceAll('\'+Char,Char,true);
+	Char = CharactersToEscape.mid(i,i);
+	Text = Text.ReplaceAll('\' + Char,Char,true);
 }
-Return Text;
+return Text;
 }
