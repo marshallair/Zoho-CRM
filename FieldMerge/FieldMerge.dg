@@ -42,8 +42,7 @@ counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
 	// Use replaceall to ignore escaped delimiters
-	Temp = MergeText.mid(TextCursor).replaceAll('\' + OpenDelimiter,"__",true);
-	Temp = Temp.replaceAll('\' + CloseDelimiter,"__",true);
+	Temp = MergeText.mid(TextCursor).replaceAll('\' + OpenDelimiter,"__",true).replaceAll('\' + CloseDelimiter,"__",true);
 	OpenDelimiterLocation = Temp.find(OpenDelimiter);
 	ClosedDelimiterLocation = Temp.find(CloseDelimiter);
 	//

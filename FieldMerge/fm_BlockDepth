@@ -1,4 +1,14 @@
-string standalone.BlockDepth(Text)
+string standalone.BlockDepth(Text, String OpenDelimiter,String CloseDelimiter)
 {
-Return BlockDepth.toString();
+if(isnull(OpenDelimiter))
+{
+    OpenDelimiter="{";
+}
+if(isnull(CloseDelimiter))
+{
+    CloseDelimiter="}";
+}
+Text=standalone.EscapeSpecialCharacters(Text,OpenDelimiter+CloseDelimiter);
+    
+Return Depth.toString();
 }

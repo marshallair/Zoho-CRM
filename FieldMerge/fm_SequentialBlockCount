@@ -1,5 +1,15 @@
-string standalone.SequentialBlockCount(String Text, String OpenDelimiter, String CloseDelimiter)
+string standalone.SequentialBlockCount(String Text, String OpenDelimiter, String CloseDelimiter, String OpenDelimiter)
 // assumes first character of Text is the first character of the block current block, immediately after the OpenDelimiter)
 {
+if(isnull(OpenDelimiter))
+{
+    OpenDelimiter="{";
+}
+if(isnull(CloseDelimiter))
+{
+    CloseDelimiter="}";
+}
+Text=standalone.EscapeSpecialCharacters(Text,OpenDelimiter+CloseDelimiter);
+
 Return BlockCount.toString();
 }
