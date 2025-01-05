@@ -1,3 +1,5 @@
+string standalone.CopyFieldsByMap(String FromMod,Int FromID,String FromData,String ToMod,Int ToID,String FieldPairs)
+{
 /*	Copyright (c) 2023, 2024 by Beza Holdings LLC.
 	Beza Holdings LLC (BEZA) does business as Beza Performance (bezaperformance.com).
 	This code may be used or altered by clients (USERS) of BEZA who have contracted with BEZA in writing for a project using Zoho applications,
@@ -17,29 +19,42 @@ CopyFieldsByMap() is a useful function for copying data from one module to anoth
 		FromData as String,			a Map of the data pulled from the From record using .getRecordFromID() or another function (ignore FromMod and FromID)
 		ToMod as String,			the Module to be copied to
 		ToID as Int,				the ID of the record to be copied to
-		FieldMap as String			a list of field pairs, separated by commas, with each pair separated by a comma
+		FieldPairs as String			a list of field pairs, separated by commas, with each pair separated by a comma
 		)
 */
-if(isNull(FromData))
+try 
 {
-	FromData = zoho.crm.getRecordById(FromMod,FromID);
+	//Test data
+	// 	FromData='{"Owner":{"name":"Melisa Spradlin","id":"6406575000000479001","email":"melisa@gomotravel.com"},"Email":null,"Description":null,"Category":null,"$currency_symbol":"$","Vendor_Name":"Marriott Westin - Denver International Airport","$field_states":null,"$review_process":{"approve":false,"reject":false,"resubmit":false},"Website":"www.marriott.com/denveria","Time_Zone":null,"$canvas_id":null,"Vendor_Country":null,"Record_Image":null,"Modified_By":{"name":"Melisa Spradlin","id":"6406575000000479001","email":"melisa@gomotravel.com"},"$review":null,"$state":"save","Unsubscribed_Mode":null,"$process_flow":false,"Address_2":null,"Phone":"222-444-4444","Street":"8300 Pena Boulevard","$locked_for_me":false,"Address_3":null,"Zip_Code":"80249","id":"6406575000002362576","Services_Offered":"Hotel","Email_Opt_Out":false,"US_State":null,"$approved":true,"$approval":{"delegate":false,"takeover":false,"approve":false,"reject":false,"resubmit":false},"Modified_Time":"2024-10-19T11:28:02-05:00","Created_Time":"2024-10-15T15:56:08-05:00","Unsubscribed_Time":null,"$editable":true,"City":"Denver","$orchestration":false,"$in_merge":false,"State":"CO","GL_Account":"Sales-Software","Locked__s":false,"Tag":[],"Created_By":{"name":"Melisa Spradlin","id":"6406575000000479001","email":"melisa@gomotravel.com"},"$approval_state":"approved"}'.toMap();
+	// 	ToID = 6406575000002430001;
+	// 	ToMod="Trip_Components";
+	// 	FieldPairs = "Street,End_Address,Address_2,End_Address_2,Address_3,End_Address_3,City,End_City,US_State,End_US_State,State,End_Province,Vendor_Country,End_Country_list,Zip_Code,End_Zip,Time_Zone,End_Time_Zone";
+	if(isNull(FromData))
+	{
+		FromData = zoho.crm.getRecordById(FromMod,FromID);
+	}
+	FL = FieldPairs.toList(",");
+	m = Map();
+	Odd = true;
+	for each  fName in FL
+	{
+		if(Odd)
+		{
+			f1 = fName;
+			Odd = false;
+		}
+		else
+		{
+			f2 = fName;
+			m.put(f2,FromData.get(f1));
+			Odd = true;
+		}
+	}
+	s = zoho.crm.updateRecord(ToMod,ToID,m);
 }
-FL = FieldMap.toList(",");
-m = Map();
-Odd = true;
-for each  fName in FL
+catch (e)
 {
-	if(Odd)
-	{
-		f1 = fName;
-		Odd = false;
-	}
-	else
-	{
-		f2 = fName;
-		Odd = true;
-	}
-	m.put(f2,FromData.get(f1));
+	s = standalone.LogError("CopyFieldsByMap",e);
 }
-s = zoho.crm.updateRecord(ToMod,ToID,m);
 return s;
+}

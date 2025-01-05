@@ -39,11 +39,40 @@ Order of development and testing:
 x	BLOCK {}
 x	DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
 x	Refactor for BlockProcess variable = 1...4
+	function to count the number of sequential blocks in the current cursor area should be created. 
+	function that counts the total number of blocks in the current block should be created. 
+	function that counts the total number of embedded block levels in the current cursor area should be created. 
+	VARIABLES? Variables could be created by using the function delimiters but putting a function name in there and then the value would simply be whatever is in the block. 
+		Variable references would have to have either something inside the block ( or pay different function that references the function. And alternative would be to use the
+		field block but do a double search for fields in a list of functions and a search of the current database table.
+	RTF: Need to do some experimentation with Rich text multi-line Fields versus other multi-line fields and see how the data is stored. Questions to be answered would
+		be if I use a rich text multiline field with field merge codes, does that need to get merged into the rich text multiple. Or, could I use a\
+		rich little text multiline field into the regular field but the rich text would be maintained as Rich text codes. Either way would be good to know.
+		Other than size is there a difference between the 3,000 character multi-line field in the 50,000 character multi-line field.
+	Need a performance testing mechanism where the data and number of iterations is stored as well as algorithm name or something like that in either a custom module
+		or a completely separate SQL database that's accessible through deluge. Call the function time stamp call another function and the timestamp calculate the length.
 x	Fix Escaped Characters on return - double-check the use of true in replaceAll functions - this should likely be TRUE in every case.
 	Inside loop, refactor code with:
-		PreprocessBlockType(MergeText,OpenDelimLoc,Index) function returning a map with, for an example IF block at 0,1,3: {"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}} to pre-load next set of processing
-		PostProcessBlockType(MergeText,OpenDelimLoc,Index) function that evaluates the BlockTypes above, as in ProcessFunc(BlockType,ResultsMap,Index)
-	FIELD ${} or $F${}
+		PreprocessBlock(MergeText,StartLocation,Index) function returning a map with, for an example IF block at current Index [0,1,3], the following would be returned:
+		{"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}} to pre-load next set of processing
+			-	Functions that require embedded arguments or map arguments are totally allowable. Maps would be indicated by blocks with a function name of block or something like that. 
+			-	When an open parenthesis is found, run a function that automatically looks for the field type and then adds as necessary the field components with identifiers in the map
+			-	When an open an open parentheses is found, as part of the function that automatically looks for a field type, check and see if an index for a the new block already exists.
+				If so, then look at the field code and decide whether anything needs done. If nothing needs done, leave the field block there. This probably means it's just containing a default. 
+			-	When a close parentheses is found for a function or operator, go through the indicated blocks for the function one by one in code. 
+			-	For functions with specified numbers of blocks, the blocks must be preloaded with either defaults or field codes. The additional field should programmatically be ignored if there
+				are more than the parameters for that particular function require.
+				For example, if an IF function contains more than three parameters, then ignore all parameters after the third. This will stop from wasting processing.
+			-	For functions with unlimited numbers of arguments, such as a and or or function, no special treatment is needed. The blocks will automatically be added as the new parameters are located.
+			-	Some functions like if, or the field function, will require processing and a decision to ignore some or all blocks. This will need either a jump to next block or some other type of function.
+
+		PostProcessBlock(MergeText,StartLocation,Index) function that evaluates the ResultsMap, as in ProcessFunc(BlockType,ResultsMap,Index)
+			-	Create a function that processes the end of a block when it close parentheses is found.
+				This will look at the block code and determine what to do with the information found within the blocks contained by the block.
+			-	Treat operators like functions that simply use the previous block as an argument. Perhaps one function could be written that handles all operators this way. 
+			-	All functions and operators will need to specify allowable data types from input parameter blocks. If these are not missing, they will need to be spelled out they do.
+			-	
+	FIELD ${} or $FIELD${}
 		just field name (Sblock1), auto assign next two blocks to {$} and "" before finding out if they contain values
 		with EVAL_IF_NOT_NULL_OR_ERROR block (missing or Sblock2)- can use just {$} for field value {$$} for field name or {$$$} for field value preceded with label, colon, and space => FieldName: FieldValue
 		with EVAL_IF_NULL_OR_ERROR block (missing or Sblock3)
@@ -53,6 +82,6 @@ x	Fix Escaped Characters on return - double-check the use of true in replaceAll 
 	|| operator
 	+ operator
 	-- unary negative operator (can I do single - and detect somehow?)
-	IIF{}
+	IF{}
 	ALL functions
 	ALL operators
