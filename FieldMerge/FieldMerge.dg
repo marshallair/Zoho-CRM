@@ -1,6 +1,7 @@
 string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,String CloseDelimiter,String FunctionCharacter)
 {
 // USAGE:
+// TEST
 //	standalone.FieldMerge(MergeText,Data,null,null,null)
 //	standalone.FieldMerge(MergeText,Data,OpenDelimiter,CloseDelimiter,FunctionCharacter)
 //  NOTE: MergeText requires double escapes (\\) for delimiters (e.g. \\{ ) and function character (e.g \\$) if trying to use as literal
