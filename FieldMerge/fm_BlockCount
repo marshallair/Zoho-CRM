@@ -1,79 +1,91 @@
-string standalone.BlockCount(String Text, String OpenDelimiter,String CloseDelimiter)
+string standalone.BlockCount(String Text,String OpenDelimiter,String CloseDelimiter)
 {
-if(isnull(OpenDelimiter))
+// USAGE:
+//  standalone.BlockCount(Text)
+//  standalone.BlockCount(Text, "{", "}")
+//
+// NOTES:
+//	BlockDepth counts the maximum depth of any embedded blocks within Text (if more than one sequential block the the deepest), ignoring the following:
+//	- Embedded blocks
+//	- Leading Closed delimiters
+//	- trailing Open delimiters
+//	- Unmatched delimiters
+//
+// TEST - answer should be 10
+	// Text = "}}\\{{\\}}{{{}}}}}{{{{{{}}}}}}}}{{{";
+//
+// DEFAULTS
+if(Text=="")
 {
-	OpenDelimiter="{";
+	Return 0;
 }
-if(isnull(CloseDelimiter))
+else 
 {
-	CloseDelimiter="}";
-}
-Text=standalone.EscapeSpecialCharacters(Text,OpenDelimiter+CloseDelimiter);
-info Text;
-End=Text.len().toLong();
-info "End: "+End;
-Cursor=0;
-OpenCount=0;
-CloseCount=0;
-counter = leftpad("1",End).replaceAll(" ","1,").toList();
-for each index i in counter
-{
-
-	OpenDelimiterLocation = Text.mid(Cursor).find(OpenDelimiter);
-	ClosedDelimiterLocation = Text.mid(Cursor).find(CloseDelimiter);
-	info "Text.mid(Cursor): "+Text.mid(Cursor);
-	info "i: "+i;
-// 	info "OpenDelimiterLocation: "+OpenDelimiterLocation;
-// 	info "CloseDelimiterLocation: "+ClosedDelimiterLocation;
-
-	// 
-	// Process which delimiter was found first and therefore which block type based on last delimiter found
-	if((OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0))
+	if(isnull(OpenDelimiter))
 	{
-		//neither found - we're done
-		break;
+		OpenDelimiter = "{";
 	}
-	else if(OpenDelimiterLocation < 0)
+	if(isnull(CloseDelimiter))
 	{
-		// only closed delimiter found
-		Cursor=Cursor+ClosedDelimiterLocation+1;
-		CloseCount=CloseCount+1;
+		CloseDelimiter = "}";
 	}
-	else if(ClosedDelimiterLocation < 0)
+	Text = standalone.ReplaceEscapedCharacters(Text,OpenDelimiter + CloseDelimiter,"__");
+	info Text;
+	End = Text.len().toLong();
+	Cursor = 0;
+	OpenCount = 0;
+	CloseCount = 0;
+	counter = leftpad("1",End).replaceAll(" ","1,").toList();
+	for each index i in counter
 	{
-		// only open delimiter found
-		Cursor=Cursor+OpenDelimiterLocation+1;
-		OpenCount=OpenCount+1;
-	}
-	else
-	{
-		// both delimiters found
-		if(OpenDelimiterLocation<ClosedDelimiterLocation)
+		OpenDelimiterLocation = Text.mid(Cursor).find(OpenDelimiter);
+		ClosedDelimiterLocation = Text.mid(Cursor).find(CloseDelimiter);
+		// 
+		// Process which delimiter was found first and therefore which block type based on last delimiter found
+		if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
 		{
-			Cursor=Cursor+OpenDelimiterLocation+1;
-			OpenCount=OpenCount+1;
+			//neither found - we're done
+			break;
+		}
+		else if(OpenDelimiterLocation < 0)
+		{
+			// only closed delimiter found
+			Cursor = Cursor + ClosedDelimiterLocation + 1;
+			CloseCount = CloseCount + 1;
+		}
+		else if(ClosedDelimiterLocation < 0)
+		{
+			// only open delimiter found
+			Cursor = Cursor + OpenDelimiterLocation + 1;
+			OpenCount = OpenCount + 1;
 		}
 		else
 		{
-			Cursor=Cursor+ClosedDelimiterLocation+1;
-			CloseCount=CloseCount+1;
+			// both delimiters found
+			if(OpenDelimiterLocation < ClosedDelimiterLocation)
+			{
+				Cursor = Cursor + OpenDelimiterLocation + 1;
+				OpenCount = OpenCount + 1;
+			}
+			else
+			{
+				Cursor = Cursor + ClosedDelimiterLocation + 1;
+				CloseCount = CloseCount + 1;
+			}
+		}
+		if(Cursor > End)
+		{
+			//we're done
+			break;
 		}
 	}
-	if(Cursor>End)
+	if(CloseCount > OpenCount)
 	{
-		//we're done
-		break;
+		return OpenCount.toString();
 	}
-	info "Cursor: "+Cursor;
-	info "OpenCount: "+OpenCount;
-	info "CloseCount: "+CloseCount;	
-}
-if(CloseCount>OpenCount)
-{
-	Return OpenCount.toString();
-}
-else
-{
-	Return CloseCount.toString();
+	else
+	{
+		return CloseCount.toString();
+	}
 }
 }
