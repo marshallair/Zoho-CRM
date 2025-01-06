@@ -11,6 +11,7 @@
 		"code-runner.runInTerminal": true,
 		"workbench.editor.languageDetection": false,
 		"workbench.editor.historyBasedLanguageDetection": false,
+		"files.associations": {"*.dg": "Java Script"},
 		"workbench.editor.languageDetectionHints": {
 			"untitledEditors": false,
 			"notebookEditors": false
