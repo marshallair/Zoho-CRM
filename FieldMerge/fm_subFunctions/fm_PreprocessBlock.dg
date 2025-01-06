@@ -1,0 +1,31 @@
+string standalone.PreprocessBlock(string Text,string Index)
+{
+// USAGE:
+//  standalone.PreprocessBlock(Text,Index)
+//
+// NOTES:
+//  Processes Text starting from position 0 as the next block. Returns a map string that needs added to ResultsMap, with a block type always starting first, then preload blocks, such as:
+//  {"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}}
+//  Care needs taken to add the blocktype block and the preload blocks to ResultsMap immediately after calling this function.
+//
+// TEST:
+ Text="$F${id,ID: {$},missing}";
+ Index=[0,0,1];
+//
+// FUNCTION:
+m=map();
+if(Text="")
+{
+    return m;
+}
+else
+{
+    //  Variables
+    BlockType="";
+    OpenDelimiter="{";
+    CloseDelimiter="}";
+    FunctionChar="$";
+    
+}
+return m;
+}

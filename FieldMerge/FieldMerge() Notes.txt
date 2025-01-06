@@ -40,7 +40,7 @@ x	BLOCK {}
 x	DON'T FORGET TO TEST FOR ESCAPED CHARACTERS EVERYWHERE!!!
 x	Refactor for BlockProcess variable = 1...4
 x	SequentialBlockCount() function to count the number of sequential blocks in the current cursor area should be created. 
-	FIX BlockCount() function that is miscounting - it counts the total number of blocks in the current block should be created. 
+x	BlockCount() function - it counts the total number of blocks in the current block should be created. 
 x	BlockDepth() function that counts the total number of embedded block levels in the current cursor area should be created. 
 	RTF: Need to do some experimentation with Rich text multi-line Fields versus other multi-line fields and see how the data is stored. Questions to be answered would
 		be if I use a rich text multiline field with field merge codes, does that need to get merged into the rich text multiple. Or, could I use a\
@@ -48,8 +48,8 @@ x	BlockDepth() function that counts the total number of embedded block levels in
 		Other than size is there a difference between the 3,000 character multi-line field in the 50,000 character multi-line field.
 x	Fix EscapeCharacters() on return - double-check the use of true in replaceAll functions - this should likely be TRUE in every case.
 x	ReplaceEscapedCharacters() function created to allow escaped characters and the \ to be ignored, by either replacing with "__" or a user-specified replacement, including nothing.
-	Inside loop, refactor code with:
-		PreprocessBlock(MergeText,StartLocation,Index) function returning a map with, for an example IF block at current Index [0,1,3], the following would be returned:
+	Inside loop, build code with:
+		PreprocessBlock(Text,Index) function returning a map with, for an example IF block at current Index [0,1,3], the following would be returned:
 		{"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}} to pre-load next set of processing
 			-	Functions that require embedded arguments or map arguments are totally allowable. Maps would be indicated by blocks with a function name of block or something like that. 
 			-	When an open parenthesis is found, run a function that automatically looks for the field type and then adds as necessary the field components with identifiers in the map
