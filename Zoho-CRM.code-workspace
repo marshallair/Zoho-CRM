@@ -4,14 +4,16 @@
 			"path": "."
 		}
 	],
-<<<<<<< HEAD
 	"settings": {
 		"debug.internalConsoleOptions": "neverOpen",
 		"testing.openTesting": "neverOpen",
 		"output.smartScroll.enabled": false,
-		"code-runner.runInTerminal": true
+		"code-runner.runInTerminal": true,
+		"workbench.editor.languageDetection": false,
+		"workbench.editor.historyBasedLanguageDetection": false,
+		"workbench.editor.languageDetectionHints": {
+			"untitledEditors": false,
+			"notebookEditors": false
+		}
 	}
-=======
-	"settings": {}
->>>>>>> 64313c7639b5dfd817f95a165caf4db443b4f713
 }

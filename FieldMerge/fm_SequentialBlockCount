@@ -1,15 +1,121 @@
-string standalone.SequentialBlockCount(String Text, String OpenDelimiter, String CloseDelimiter, String OpenDelimiter)
-// assumes first character of Text is the first character of the block current block, immediately after the OpenDelimiter)
+string standalone.SequentialBlockCount(String Text,String OpenDelimiter,String CloseDelimiter)
 {
+// USAGE:
+//  standalone.SequentialBlockCount(Text)
+//  standalone.SequentialBlockCount(Text, "{", "}")
+//
+// NOTES:
+//	SequentialBlockCount counts the sequential blocks in Text, ignoring the following:
+//	- Embedded blocks
+//	- Leading Closed delimiters
+//	- trailing Open delimiters
+//	- Unmatched delimiters
+//
+// TEST - answer should be 2
+// Text = "\\{{}\\$\\}{asdf{{\\{{{}}}}}}";
+//
+// DEFAULTS
 if(isnull(OpenDelimiter))
 {
-    OpenDelimiter="{";
+	OpenDelimiter = "{";
 }
 if(isnull(CloseDelimiter))
 {
-    CloseDelimiter="}";
+	CloseDelimiter = "}";
 }
-Text=standalone.EscapeSpecialCharacters(Text,OpenDelimiter+CloseDelimiter);
-
-Return BlockCount.toString();
+//
+// FUNCTION:
+//  Variables
+Cursor = 0;
+OpenCount = 0;
+CloseCount = 0;
+ReturnCount = 0;
+Level = 0;
+Text = standalone.EscapeCharacters(Text,OpenDelimiter + CloseDelimiter);
+LastOpen = false;
+End = Text.len().toLong();
+//
+// Loop
+counter = leftpad("1",End).replaceAll(" ","1,").toList();
+for each index i in counter
+{
+	OpenDelimiterLocation = Text.mid(Cursor).find(OpenDelimiter);
+	ClosedDelimiterLocation = Text.mid(Cursor).find(CloseDelimiter);
+	// Process which delimiter was found first and therefore which block type based on last delimiter found
+	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
+	{
+		//neither found - we're done
+		break;
+	}
+	else if(ClosedDelimiterLocation < 0)
+	{
+		// only open delimiter found
+		if(LastOpen)
+		{
+			Level = Level + 1;
+		}
+		Cursor = Cursor + OpenDelimiterLocation + 1;
+		OpenCount = OpenCount + 1;
+		LastOpen = true;
+	}
+	else if(OpenDelimiterLocation < 0)
+	{
+		// only closed delimiter found, only count on level 0
+		Cursor = Cursor + ClosedDelimiterLocation + 1;
+		LastOpen = false;
+		if(OpenCount > CloseCount)
+		{
+			CloseCount = CloseCount + 1;
+			if(Level > 0)
+			{
+				Level = Level - 1;
+			}
+			else
+			{
+				// Level=0
+				ReturnCount = ReturnCount + 1;
+			}
+		}
+	}
+	else
+	{
+		// both delimiters found
+		if(OpenDelimiterLocation < ClosedDelimiterLocation)
+		{
+			// Open delimiter found
+			if(LastOpen)
+			{
+				Level = Level + 1;
+			}
+			Cursor = Cursor + OpenDelimiterLocation + 1;
+			OpenCount = OpenCount + 1;
+			LastOpen = true;
+		}
+		else
+		{
+			// Closed delimiter found
+			Cursor = Cursor + ClosedDelimiterLocation + 1;
+			LastOpen = false;
+			if(OpenCount > CloseCount)
+			{
+				CloseCount = CloseCount + 1;
+				if(Level > 0)
+				{
+					Level = Level - 1;
+				}
+				else
+				{
+					// Level=0
+					ReturnCount = ReturnCount + 1;
+				}
+			}
+		}
+	}
+	if(Cursor > End)
+	{
+		//we're done
+		break;
+	}
+}
+return ReturnCount.toString();
 }

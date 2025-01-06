@@ -1,0 +1,34 @@
+string standalone.ReplaceEscapedCharacters(String Text,String CharactersToEscape, String ReplaceWith)
+{
+// USAGE:
+// standalone.ReplaceEscapedCharacters(String,CharactersToEscape,"xx")
+// standalone.ReplaceEscapedCharacters(String,null,null)
+
+//
+// TEST
+// Text = "TEST \$asdf \{adf a\} ad{} DATA";
+//
+// DEFAULTS (for some reason, ifNull() doens't evaluate properly for null values. Weird bug or something)
+if(CharactersToEscape="")
+{
+    CharactersToEscape = "${} ";
+}
+else 
+{
+    // need extra character so mid(i,i+1) below doesn't refer to an out-of-bound character location
+    CharactersToEscape=CharactersToEscape+"_";
+}
+if(ReplaceWith=="")
+{
+    ReplaceWith="__";
+}
+//
+// FUNCTION
+looper = Leftpad("1",CharactersToEscape.len()).replaceAll(" ","1,").toList();
+for each index i in looper
+{
+	Char = CharactersToEscape.mid(i,i+1);
+	Text = Text.ReplaceAll('\' + Char,ReplaceWith,true);
+}
+return Text;
+}

@@ -1,7 +1,8 @@
-string standalone.EscapeSpecialCharacters(String Text,String CharactersToEscape)
+string standalone.EscapeCharacters(String Text,String CharactersToEscape)
 {
 // USAGE:
-// standalone.ExcapeSpecialCharacters(String,CharactersToEscape)
+// standalone.ExcapeCharacters(String,CharactersToEscape)
+// standalone.ExcapeCharacters(String,null)
 //
 // TEST
 // Text = "TEST \$\{\} DATA";
