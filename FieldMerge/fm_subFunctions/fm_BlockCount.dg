@@ -12,14 +12,14 @@ string standalone.BlockCount(String Text,String OpenDelimiter,String CloseDelimi
 //	- Unmatched delimiters
 //
 // TEST - answer should be 10
-	// Text = "}}\\{{\\}}{{{}}}}}{{{{{{}}}}}}}}{{{";
+// 	Text = "}{}{}}{";
 //
 // DEFAULTS
-if(Text=="")
+if(Text == "")
 {
-	Return 0;
+	return 0;
 }
-else 
+else
 {
 	if(isnull(OpenDelimiter))
 	{
@@ -35,6 +35,8 @@ else
 	Cursor = 0;
 	OpenCount = 0;
 	CloseCount = 0;
+	Level=0;
+	LastOpen=false;
 	counter = leftpad("1",End).replaceAll(" ","1,").toList();
 	for each index i in counter
 	{
@@ -47,30 +49,47 @@ else
 			//neither found - we're done
 			break;
 		}
+		else if(ClosedDelimiterLocation < 0)
+		{
+			// only open delimiter found
+			if(LastOpen)
+			{
+				Level = Level + 1;
+			}
+			Cursor = Cursor + OpenDelimiterLocation + 1;
+			OpenCount = OpenCount + 1;
+			LastOpen = true;
+		}
 		else if(OpenDelimiterLocation < 0)
 		{
 			// only closed delimiter found
 			Cursor = Cursor + ClosedDelimiterLocation + 1;
-			CloseCount = CloseCount + 1;
-		}
-		else if(ClosedDelimiterLocation < 0)
-		{
-			// only open delimiter found
-			Cursor = Cursor + OpenDelimiterLocation + 1;
-			OpenCount = OpenCount + 1;
+			LastOpen = false;
+			if(OpenCount > CloseCount)
+			{
+				CloseCount = CloseCount + 1;
+				Level = Level - 1;
+			}
 		}
 		else
 		{
 			// both delimiters found
 			if(OpenDelimiterLocation < ClosedDelimiterLocation)
 			{
+				// Open delimiter found first
 				Cursor = Cursor + OpenDelimiterLocation + 1;
 				OpenCount = OpenCount + 1;
 			}
 			else
 			{
+				// Closed delimiter found first
 				Cursor = Cursor + ClosedDelimiterLocation + 1;
-				CloseCount = CloseCount + 1;
+				LastOpen = false;
+				if(OpenCount > CloseCount)
+				{
+					CloseCount = CloseCount + 1;
+					Level = Level - 1;
+				}
 			}
 		}
 		if(Cursor > End)
