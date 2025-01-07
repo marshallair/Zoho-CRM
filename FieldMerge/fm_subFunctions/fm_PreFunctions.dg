@@ -1,0 +1,18 @@
+string standalone.fmfunc_FIELD(string strIndex)
+{
+Index=strIndex.toList();
+m=map();
+m.put(Index.add(0).toList(),"FIELD");
+Return m;
+}
+/////////////////////////////////////////////////
+//
+string standalone.fmfunc_IF(string strIndex)
+{
+Index=strIndex.toList();
+m=map();
+m.put(Index.add(0).toList(),"FIELD");
+Return m;
+}
+////////////////////////////////////////////////
+//

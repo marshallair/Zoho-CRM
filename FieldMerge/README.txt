@@ -187,5 +187,29 @@ sFieldList is in itself a string parameter list, as follows:
 	The field data returned from a DateTime record doesn't match the format needed by Deluge to properly process using DateTime functions, so it must first be changed using the .toTime() function,
 	then can be manipulated and reformatted back to the record-based standard. For example:
 		updated_date_time = record.get("Date_Time_Field").toTime("yyyy-MM-dd'T'HH:mm:ss").addMinutes(90).toString("yyyy-MM-dd'T'HH:mm:ss+10:00")
-*/
 
+ADDENDUM: Noted problems with Deluge processing:
+Lists used as Map keys:
+	FieldMerge consistently uses an Index list as a map key to allow levels to be stored within the Indices, not just sequential location.
+	Deluge maps with an a list used as key value(s) apparently use an internal pointer or something, because if we change the Index variable used
+	to create the map key-value pair with .add(), the next time we inspect the newly added variable the key has changed to whatever value the Index list
+	variable has changed to.
+	
+	Therefore, we have to "clone" the list to use it using duplicate().
+	
+	Also, without using toList() with this function, occasionally the new index
+	elements are converted to strings (another bug we assume as it happened arbitrarily), such as ["0","1"] instead of [0,1], for example. This seemed arbitrary.
+	
+	Therefore, we always use...
+		listvar.duplicate(0).toList() 
+	...when assigning a list to a map key.
+
+Problems with Deluge IfNull():
+	In some cases, ifnull was returning the first parameter even though isnull() on the same parameter was returning true. This seemed arbitrary, and was not consistent.
+	Therefore, instead of...
+		varname=ifnull(varname,"default value")
+	... we consistently use (particularly for standalone function parameters):
+		if(varname=="")
+		{
+			varname="default value"
+		}

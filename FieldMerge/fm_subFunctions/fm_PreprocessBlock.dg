@@ -1,4 +1,4 @@
-string standalone.PreprocessBlock(string Text,string Index)
+string standalone.PreprocessBlock(string MergeText,int BlockDelimiterLocation, string strIndex, String OpenDelimiter,String CloseDelimiter,String FunctionCharacter)
 {
 // USAGE:
 //  standalone.PreprocessBlock(Text,Index)
@@ -9,23 +9,46 @@ string standalone.PreprocessBlock(string Text,string Index)
 //  Care needs taken to add the blocktype block and the preload blocks to ResultsMap immediately after calling this function.
 //
 // TEST:
- Text="$F${id,ID: {$},missing}";
+ MergeText="$F${id,ID: {$},missing}";
+ Cursor=3;
  Index=[0,0,1];
 //
 // FUNCTION:
 m=map();
-if(Text="")
+if(trim(MergeText)="")
 {
-    return m;
+    return null;
 }
 else
 {
-    //  Variables
-    BlockType="";
-    OpenDelimiter="{";
-    CloseDelimiter="}";
-    FunctionChar="$";
-    
+    //  Variables, defaults
+    Index=strIndex.toList();
+    BlockType="BLOCK";
+    if(OpenDelimiter=="")
+    {
+        OpenDelimiter="{";
+    }
+    if(CloseDelimiter=="")
+    {
+        CloseDelimiter="}";
+    }
+    if(FunctionCharacter=="")
+    {
+        FunctionCharacter="$";
+    }
+    //
+    // Every function and operator is evaluated here. To add new operators or functions, add them here, and then call their function
+    if(upper(MergeText.mid(BlockDelimiterLocation - 1, BlockDelimiterLocation)) == FunctionCharacter
+        ||standalone.IsBlockThisFunction("F",MergeText,BlockDelimiterLocation,FunctionCharacter))
+    {
+        // Field (F) function
+//         m.putAll(standalone.fmfunc_FIELD(Index).toMap());
+    }
+    else if(standalone.IsBlockThisFunction("IF",MergeText,BlockDelimiterLocation,FunctionCharacter))
+    {
+        // IF function
+//         m.putAll(standalone.fmfunc_IF(Index).toMap());
+    }
 }
 return m;
 }

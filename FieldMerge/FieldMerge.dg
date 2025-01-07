@@ -15,14 +15,23 @@ MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wed
 Data = "";
 //
 // DEFAULTS:
-OpenDelimiter = if(isnull(OpenDelimiter),"{",OpenDelimiter);
-CloseDelimiter = if(isnull(CloseDelimiter),"}",CloseDelimiter);
-FunctionCharacter = ifnull(FunctionCharacter,"$");
+if(OpenDelimiter=="")
+{
+	OpenDelimiter="{";
+}
+if(CloseDelimiter=="")
+{
+	CloseDelimiter="}";
+}
+if(FunctionCharacter=="")
+{
+	FunctionCharacter="$";
+}
 //
 // FUNCTION:
 // Variables
 MergeText = OpenDelimiter + MergeText + CloseDelimiter;
-info "MergeText: " + MergeText;
+// info "MergeText: " + MergeText;
 ResultsMap = Map();
 LastDelimiterWasOpen = true;
 TextCursor = 0;
@@ -46,14 +55,14 @@ for each index i in counter
 	OpenDelimiterLocation = Temp.find(OpenDelimiter);
 	ClosedDelimiterLocation = Temp.find(CloseDelimiter);
 	//
-	info "Pass(i): " + i + " of " + End + " , TextCursor: " + TextCursor + " , OpenDelimiterLocation: " + OpenDelimiterLocation + " , ClosedDelimiterLocation: " + ClosedDelimiterLocation;
-	info "Text from TextCursor to end: " + MergeText.mid(TextCursor);
+	// info "Pass(i): " + i + " of " + End + " , TextCursor: " + TextCursor + " , OpenDelimiterLocation: " + OpenDelimiterLocation + " , ClosedDelimiterLocation: " + ClosedDelimiterLocation;
+	// info "Text from TextCursor to end: " + MergeText.mid(TextCursor);
 	// 
 	// Process which delimiter was found first and therefore which block type based on last delimiter found
 	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
 	{
 		// THIS SHOULD NEVER HAPPEN DUE TO MergeText=OpenDelimiter+MergeText+CloseDelimiter above
-		info "BREAKING ON DELIMITER NOT FOUND - THIS SHOULD NEVER HAPPEN";
+		// info "BREAKING ON DELIMITER NOT FOUND - THIS SHOULD NEVER HAPPEN";
 		break;
 	}
 	else if(OpenDelimiterLocation < 0)
@@ -86,6 +95,9 @@ for each index i in counter
 			// Otherwise, it changes the map variable when we change the value of CurrentIndex! Also, without using toList() with this function, occasionally the new index
 			// elements are converted to strings (another bug), such as ["0","1"] instead of [0,1], for example. Therefore, we always use listvar.duplicate(0).toList() 
 			// when assigning a list to a map key...
+			//
+			// Add preprocess key-value pairs to map
+			// ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
 			ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
@@ -95,6 +107,8 @@ for each index i in counter
 		{
 			// just add a new level to CurrentIndex
 			CurrentIndex.add(0);
+			// Add preprocess key-value pairs to map
+			// ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
 			TextCursor = TextCursor + 1;
 		}
@@ -110,19 +124,21 @@ for each index i in counter
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 		}
-		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
-		ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
+		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+		// Add preprocess key-value pairs to map
+		// ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
+		ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
 		LastDelimiterWasOpen = true;
 	}
 	else if(BlockProcess == EndSblock)
 	{
-		info "START EndSblock processing -------------";
-		info ResultsMap;
-		info "CurrentIndex = " + CurrentIndex.toList();
-		BlockType = ResultsMap.get(CurrentIndex.toList());
-		info "BlockType = " + BlockType;
-		info "ResultsMap.get(CurrentIndex) = " + ResultsMap.get(CurrentIndex.toList());
+		// info "START EndSblock processing -------------";
+		// info ResultsMap;
+		// info "CurrentIndex = " + CurrentIndex.toList();
+		// BlockType = ResultsMap.get(CurrentIndex.toList());
+		// info "BlockType = " + BlockType;
+		// info "ResultsMap.get(CurrentIndex) = " + ResultsMap.get(CurrentIndex.toList());
 		if(BlockType == "BLOCK")
 		{
 			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = " + MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
@@ -130,7 +146,7 @@ for each index i in counter
 		}
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
-		info "END EndSblock processing -------------";
+		// info "END EndSblock processing -------------";
 	}
 	else if(BlockProcess == EndEblock)
 	{
@@ -156,8 +172,8 @@ for each index i in counter
 			// iterate through concatenation of each sub block
 			for each  x in Indices
 			{
-				info x;
-				info "ResultsMap.get(x.toList()) = " + ResultsMap.get(x.toList());
+				// info x;
+				// info "ResultsMap.get(x.toList()) = " + ResultsMap.get(x.toList());
 				// concatenate at parent level and remove map
 				ResultsMap.put(ParentBlockKey.toList(),ResultsMap.get(ParentBlockKey.toList()) + ResultsMap.get(x.toList()));
 				ResultsMap.remove(x.toList());
@@ -168,12 +184,12 @@ for each index i in counter
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
 	}
-	info "ResultsMap AFTER processing is: " + ResultsMap;
-	info "TextCursor AFTER processing is: " + TextCursor + " , End: " + End;
+	// info "ResultsMap AFTER processing is: " + ResultsMap;
+	// info "TextCursor AFTER processing is: " + TextCursor + " , End: " + End;
 	if(TextCursor > End)
 	{
 		// we're done
-		info "!!! BREAKING ON TEXT CURSOR = " + TextCursor;
+		// info "!!! BREAKING ON TEXT CURSOR = " + TextCursor;
 		break;
 	}
 }
