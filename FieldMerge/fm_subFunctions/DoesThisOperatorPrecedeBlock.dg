@@ -1,0 +1,15 @@
+string standalone.DoesThisOperatorPrecedeBlock(String Operator,String MergeText,Int BlockDelimiterLocation)
+{
+// standalone.IsBlockThisFunction(FunctionName,MergeText,BlockDelimiterLocation,FunctionCharacter)
+//
+// Test Data
+// FunctionName="AND";
+// MergeText="{true}$AND${false}";
+// BlockDelimiterLocation=null;
+// FunctionCharacter="$";
+// DEFAULTS
+BlockDelimiterLocation = ifnull(BlockDelimiterLocation,0);
+//
+// Process
+return (upper(MergeText.mid(BlockDelimiterLocation - Operator.Len(),BlockDelimiterLocation)) == Operator).toString();
+}

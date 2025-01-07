@@ -1,0 +1,18 @@
+string standalone.PostprocessBlock(string MergeText,int BlockDelimiterLocation, string strIndex)
+{
+// USAGE:
+//  standalone.PostprocessBlock(Text,Index)
+//
+// NOTES:
+//  Processes Text starting from position 0 as the next block. Returns a map string containing the result, and a list of key values that need deleted if necessary to avoid
+//  unneeded additional processing, for example the following for BLOCKTYPE "IF_COND":
+//  {"blockresult":"true","skip_blocks":{[0,1,3,3]:"IF_FALSE"}
+//  Care needs taken to to skip the unneeded text in MergeText represented by the skip_blocks list, and remove their key-value pair(s).
+//
+// TEST:
+    MergeText="$F${id,ID: {$},missing}";
+    Cursor=3;
+    Index=[0,0,1];
+//
+// FUNCTION:    
+}

@@ -1,9 +1,20 @@
 string standalone.fmfunc_FIELD(string strIndex)
 {
-Index=strIndex.toList();
+//TEST - result should be "{"blocktype":"FIELD","preload_blocks":{[2,4,0]:"FIELD_NAME",[2,4,1]:"FIELD_NOT_NULL",[2,4,2]:"FIELD_NULL",[2,4,3]:"FIELD_ERROR"}}"
+// strIndex=[2,4];
+i=strIndex.toList(",");
 m=map();
-m.put(Index.add(0).toList(),"FIELD");
-Return m;
+ResultMap=map();
+ResultMap.put("blocktype","FIELD");
+i.add(0);
+m.put(i.duplicate(0).toList(),"FIELD_NAME");
+i=standalone.IncrementSequentialIndex(i).toList(",");
+m.put(i.duplicate(0).toList(),"FIELD_NOT_NULL");
+i=standalone.IncrementSequentialIndex(i).toList(",");
+m.put(i.duplicate(0).toList(),"FIELD_NULL");
+i=standalone.IncrementSequentialIndex(i).toList(",");
+m.put(i.duplicate(0).toList(),"FIELD_ERROR");
+ResultMap.put("preload_blocks",m);Return ResultMap;
 }
 /////////////////////////////////////////////////
 //
@@ -11,8 +22,13 @@ string standalone.fmfunc_IF(string strIndex)
 {
 Index=strIndex.toList();
 m=map();
-m.put(Index.add(0).toList(),"FIELD");
-Return m;
+ResultMap=map();
+ResultMap.put("blocktype","IF");
+m.put(standalone.Index.add(0).duplicate(0).toList(),"IF_COND");
+m.put(standalone.Index.add(1).duplicate(0).toList(),"IF_TRUE");
+m.put(standalone.Index.add(2),duplicate(0).toList(),"IF_FALSE");
+ResultMap.put("preload_blocks",m);
+Return ResultMap;
 }
 ////////////////////////////////////////////////
 //
