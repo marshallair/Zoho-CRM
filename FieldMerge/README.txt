@@ -48,7 +48,8 @@ FieldMerge() FUNCTIONS
         $NOR$					logical not OR							NONE or unlimited												TRUE as default until a true is found
         $XOR$					logical exclusive OR				{boolean1}{boolean2}												TRUE for different, FALSE for same
         $NOT$					logical not							unary function so {boolean}											Boolean of {boolean}
-        $SETDEFAULTMODULE$      sets the default module             module name                                                         true if module exists, false if module does not exist or another error occurs
+        $SET_DEFAULT_MODULE$    sets the default module             module name                                                         true if module exists, false if module does not exist or another error occurs
+        {{modulename.fieldname}} simple field value                 field API name (with or without module)                             Returns the value of Fieldname or a blank if null or an error.
         $F$ or $				field value							field API name (with or without module), not null block, null block, error block
                                                                     -OR- {functionname}{eval_if_blank_or_error}     					Value of field if only field name is present (or blank if error or null).
                                                                                                                                         The module is assumed to be the default module, unless specified. The format is moduleAPIname.fieldAPIname.
@@ -67,7 +68,6 @@ FieldMerge() FUNCTIONS
 FieldMerge() OPERATORS
     Between blocks{}, operators can be used to create compound evaluations:
         OPERATOR	DESC											RETURNS
-        ==          equals                                          true if two values are equal, false otherwise. Errors return a false.
         +			add or concatenate								if one value is a string, concat and return string, otherwise, add and return number. If both are boolean, perform logical AND.
         -			subtract										number or null if both values are not numbers.
         *			multiply										number or null if both values are not numbers.
@@ -77,7 +77,8 @@ FieldMerge() OPERATORS
         &&			logical AND										boolean (defaults as true unless one argument is error, null, or false)
         ||			logical OR										boolean (defaults as false unless one argument is boolean true)
         !			unary logical NOT								boolean (defaults as false unless the block is boolean false)
-
+        ==          logical equals                                  true if two values are equal, false otherwise. Errors return a false.
+        
 NEW FieldMerge() FUNCTIONS & OPERATORS
     New FieldMerge functions and operatorsw can be easily written inside the PreprocessBlock() and PostProcessBlock() functions. Functions and operators can create any parameter
     structure required in the ResultsMap, and process them as needed using the BLOCKNAME attribute for postprocessing.
