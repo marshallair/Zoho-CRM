@@ -1,8 +1,8 @@
 string standalone.SequentialBlockCount(String Text,String OpenDelimiter,String CloseDelimiter)
 {
 // USAGE:
-//  standalone.SequentialBlockCount(Text)
-//  standalone.SequentialBlockCount(Text, "{", "}")
+//  standalone.SequentialBlockCount(Text).toLong();
+//  standalone.SequentialBlockCount(Text, "{", "}").toLong();
 //
 // NOTES:
 //	SequentialBlockCount counts the sequential blocks in Text, ignoring the following:

@@ -1,0 +1,18 @@
+string standalone.DeleteChildren(string strResultsMap,string strIndex)
+{
+// USAGE
+//  standalone.FuncName()
+//
+// NOTES
+//
+// TEST
+//  Parameter1="TEST DATA";
+//  Parameter2=null;
+//
+// ERROR CHECKS
+//
+// DEFAULTS
+//
+// VARIABLES
+//
+// FUNCTION

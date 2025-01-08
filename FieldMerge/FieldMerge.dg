@@ -13,18 +13,23 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wedding}.";
 //	MergeText = "Marshall Henley {is the }{best}";
 //
+// ERROR HANDLING:
+if(MergeText="")
+{
+	return "MergeText is empty.";
+}
 // DEFAULTS:
-if(OpenDelimiter=="")
+if(OpenDelimiter == "")
 {
-	OpenDelimiter="{";
+	OpenDelimiter = "{";
 }
-if(CloseDelimiter=="")
+if(CloseDelimiter == "")
 {
-	CloseDelimiter="}";
+	CloseDelimiter = "}";
 }
-if(FunctionCharacter=="")
+if(FunctionCharacter == "")
 {
-	FunctionCharacter="$";
+	FunctionCharacter = "$";
 }
 //
 // FUNCTION:
@@ -82,7 +87,7 @@ for each index i in counter
 	{
 		//default for each new block
 		BlockType = "BLOCK";
-//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
+		//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
 		if(OpenDelimiterLocation > 0)
 		{
 			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
@@ -93,10 +98,10 @@ for each index i in counter
 			// when assigning a list to a map key...
 			//
 			// Add preprocess key-value pairs to map
-			// ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
-			ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
+			ResultsMap.putAll(PreprocessBlock(true, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
+			// ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
 			TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		}
 		else
@@ -135,6 +140,7 @@ for each index i in counter
 		// BlockType = ResultsMap.get(CurrentIndex.toList());
 		// info "BlockType = " + BlockType;
 		// info "ResultsMap.get(CurrentIndex) = " + ResultsMap.get(CurrentIndex.toList());
+		// ResultsMap.putAll(PostprocessBlock(ResultsMap,Index).toMap());
 		if(BlockType == "BLOCK")
 		{
 			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = " + MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
