@@ -12,7 +12,6 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 // 	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
 MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wedding}.";
 //	MergeText = "Marshall Henley {is the }{best}";
-Data = "";
 //
 // DEFAULTS:
 if(OpenDelimiter=="")
@@ -29,9 +28,8 @@ if(FunctionCharacter=="")
 }
 //
 // FUNCTION:
-// Variables
+// Variables (int BlockProcess defined later)
 MergeText = OpenDelimiter + MergeText + CloseDelimiter;
-// info "MergeText: " + MergeText;
 ResultsMap = Map();
 LastDelimiterWasOpen = true;
 TextCursor = 0;
@@ -43,8 +41,6 @@ NewEblock = 1;
 NewSblock = 2;
 EndSblock = 3;
 EndEblock = 4;
-// BlockProcess=1;
-//
 //
 // START LOOPING TO FIND FIELDS AND PROCESS (lame way of doing while loops in Deluge - must break to exit)
 counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
@@ -86,7 +82,7 @@ for each index i in counter
 	{
 		//default for each new block
 		BlockType = "BLOCK";
-		//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
+//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
 		if(OpenDelimiterLocation > 0)
 		{
 			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
@@ -199,5 +195,5 @@ if(ResultText == "BLOCK")
 	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
 }
 info ResultText;
-return standalone.EscapeSpecialCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
+return standalone.EscapeCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
 }
