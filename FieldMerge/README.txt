@@ -1,11 +1,10 @@
 # Zoho-CRM
-Various functions used within Zoho CRM projects
-
 FieldMerge()
-
     FieldMerge() provides a "merging" language using strings and field data, along with functions and operators, to provide (hopefully) a robust ability to aggregate
     Zoho data using Deluge into chunks of string data. These would typically be stored in multi-line fields within the CRM environment, but the function outputs a String
     that can be used anywhere strings are use.
+
+    FieldMerge() returns a string that represents the full processing of MergeText against the Data.
 
     The FieldMerge() arguments are:
         String MergeText										A string representing the "merge language" of FieldMerge() to be parsed for output
@@ -14,56 +13,57 @@ FieldMerge()
         String CloseDelimiter (optional)						A close block delimiter. If left null, "}" is the default
         String FunctionCharacter (optional)						A delimiter used to identify function name beginnings and ends. If left null, "$" is the default.
 
-    The FieldMerge "language" is based on the concept of blocks, functions, operators, and string text. Hereafter, the default OpenDelim, CloseDelim, and FunctionDelim
-    are used in the descriptions.
+    The FieldMerge "language" is based on the concept of blocks, functions, operators.
 
 FieldMerge() BLOCKS
 
-    A block, specified hereafter as Block{}, is a chuck of text that is treated as identifiably separate from the surrounding MergeText information.
+    A block is a chuck of text that is treated as identifiably separate from the surrounding MergeText information.
     Blocks can contain anything. Examples:
-        String text:																{Hello world!}
-        Functions to retrieve field data:						${firstname} or $FIELD${firstname}
-        Arguments for functions:										$IIF$({${Dept}==Sales},${Revenue},{})
-        Other, nested blocks:												Level0Text{Level1Text{Level2Text}{MoreLevel2Text}{{Level3Text}}}
+        String text:                          {Hello world!} => "Hellow World!"
+        Functions to retrieve field data:     ${firstname} or $F${firstname} or {{firstname}} => "Jerry"
+        Function Arguments and operators:     $IF${{${Dept}==Sales}${{Revenue}{{$N}: {$}}}{Not in sales department.}} => "Sales: $25,000"  -OR-  =>"Not in sales department."
+        Embedded or sequential blocks:        Level0Text {Level1Text {Level2SequentialText }{MoreLevel2SequentialText }{{Level3Text}}}. => "Level0Text Level1Text Level2SequentialText MoreLevel2SequentialText Level3Text."
         
-    Between the ability to nest blocks, and use functions, any output can be achieved, including JSON or HTML.
+    Between the ability to nest blocks, and use functions, any output can be achieved, including JSON, HTML, or Rich Text.
 
 FieldMerge() FUNCTIONS
 
-    Details of functions and arguments are in addendum A.
+    Details of functions and their parameters are found in addendum A.
 
-    The Functions used within the FieldMerge() language always start with $ and end with $, as in $FUNCTIONNAME${}.
-    Parameters for functions appear as ordered blocks within the function, such as $IIF${{condition}{eval_if_true}{eval_if_false}}
+    The Functions used within the FieldMerge() language generally start with $ and end with $, as in $FUNCTIONNAME${}.
+    There is one exception, {{}} for simple fields.
+    Parameters for functions appear as sequential blocks within the function, such as $IF${{condition}{eval_if_true}{eval_if_false}}
     Some functions can have no arguments, or unlimited arguments, such as $AND${{arg1}{arg2}...{argN}}.
-    Other functions can have optional arguments, such as $F${{fieldname},{optional_eval_if_null}}.
+    Other functions can have optional arguments, such as $F${{fieldname},{optional_eval_if_null}{optiona_eval_if_error}}.
+    Some functions contain placeholders for use within parameters, such as {$} for field data or {$N} for the API field name.
     A few functions have shortened versions. For example, ${} is the shortcut for the $F${} function.
 
     The functions are:
-        NAME					DESC								ARGS        														RETURNS
-        -----					-------------						-----------------------												---------------
-        $IF$					Immediate IF function				{condition}{eval_if_true}{eval_if_not_true}							{eval_if_true} for {condition}=true, all others {eval_if_not_true}				
-        $AND$					logical AND							NONE or unlimited													TRUE as default until a false is found
-        $NAND$					logical not AND						NONE or unlimited													FALSE as default until a false is found
-        $OR$					logical OR							NONE or unlimited													FALSE as default until a true is found
-        $NOR$					logical not OR							NONE or unlimited												TRUE as default until a true is found
-        $XOR$					logical exclusive OR				{boolean1}{boolean2}												TRUE for different, FALSE for same
-        $NOT$					logical not							unary function so {boolean}											Boolean of {boolean}
-        $SET_DEFAULT_MODULE$    sets the default module             module name                                                         true if module exists, false if module does not exist or another error occurs
-        {{modulename.fieldname}} simple field value                 field API name (with or without module)                             Returns the value of Fieldname or a blank if null or an error.
-        $F$ or $				field value							field API name (with or without module), not null block, null block, error block
-                                                                    -OR- {functionname}{eval_if_blank_or_error}     					Value of field if only field name is present (or blank if error or null).
-                                                                                                                                        The module is assumed to be the default module, unless specified. The format is moduleAPIname.fieldAPIname.
-                                                                                                                                        If not null block is present, then it is returned. {$} is placeholder for value, {$N} is placeholder for field name.
-                                                                                                                                        If null block is present, then it is returned for a null field value, {$N} is placeholder for field API name.
-                                                                                                                                        If error block is present, then it is returned if there is an error, such as field name doesn't exist,
-                                                                                                                                            {$N} is placeholder for field name {$E} is the placeholder for error value.
-        $DEFVAR$				defines a variable					variable name														nothing
-        $GETVAR$				returns a variable value			variable name														returns a variable value if only variable name is present (or blank if error or null)
-                                                                                                                                        If not null block is present, then it is returned. {$} is placeholder for value, {$N} is placeholder for variable name.
-                                                                                                                                        If null block is present, then it is returned for a null variable value, {$N} is placeholder for variable name.
-                                                                                                                                        If error block is present, then it is returned if variable name doesn't exist, {$N} is placeholder for variable name.
-        $INCLUDE$				file include 						file path and name in a single string								replaces the block with the contents of the file, and continues processing as if it was part of MergeText
-        $WRITE$					file output							file path and name in a single string, mergetext string				writes the contents of the mergetext string after processing to the file name and path 
+        NAME                     DESC                                ARGS                                                                RETURNS
+        -----                    -------------                       -----------------------                                             ---------------
+        $IF$                     Immediate IF function               {condition}{eval_if_true}{eval_if_not_true}                         {eval_if_true} for {condition}=true, all others {eval_if_not_true}				
+        $AND$                    logical AND                         NONE or unlimited                                                   TRUE as default until a false is found
+        $NAND$                   logical not AND                     NONE or unlimited                                                   FALSE as default until a false is found
+        $OR$                     logical OR                          NONE or unlimited                                                   FALSE as default until a true is found
+        $NOR$                    logical not OR                      NONE or unlimited                                                   TRUE as default until a true is found
+        $XOR$                    logical exclusive OR                {boolean1}{boolean2}                                                TRUE for different, FALSE for same
+        $NOT$                    logical not                         unary function so {boolean}                                         Boolean of {boolean}
+        {{modulename.fieldname}} simple field value                  field API name                                                      Returns the value of Fieldname or a blank if null or an error.
+        $F$ or $                 field value                         {field API name}{not blank},{blank}{error}
+                                                                    -OR- {functionname}{eval_if_blank_or_error}                          Value of field if only field name is present (or blank if error or null).
+                                                                                                                                         The module is assumed to be the default module, unless specified. The format is moduleAPIname.fieldAPIname.
+                                                                                                                                         If not null block is present, then it is returned.
+                                                                                                                                         {$} is placeholder for field value.
+                                                                                                                                         {$N} is placeholder for field API name without module name.
+                                                                                                                                         If null block is present, then it is evaluated and returned for a null field value, including {$N}
+                                                                                                                                         If error block is present, then it is returned if there is an error, such as field name doesn't exist,
+                                                                                                                                             {$N} can be used and {$E} is the placeholder for the error value.
+        $DEFVAR$                 defines a variable                  variable name                                                       nothing or error value if not a valid variable name. Can contain alpha, numeric, and "_" characters.
+        $GETVAR$                 returns a variable value            variable name                                                       returns a variable value if only variable name is present (or blank if error or null)
+                                                                                                                                         If not null block is present, then it is returned. {$} is placeholder for value, {$N} is placeholder for variable name.
+                                                                                                                                         If null block is present, then it is returned for a null variable value, {$N} is placeholder for variable name.
+                                                                                                                                         If error block is present, then it is returned if variable name doesn't exist, {$N} is placeholder for variable name.
+
 
 FieldMerge() OPERATORS
     Between blocks{}, operators can be used to create compound evaluations:
@@ -78,7 +78,7 @@ FieldMerge() OPERATORS
         ||			logical OR										boolean (defaults as false unless one argument is boolean true)
         !			unary logical NOT								boolean (defaults as false unless the block is boolean false)
         ==          logical equals                                  true if two values are equal, false otherwise. Errors return a false.
-        
+
 NEW FieldMerge() FUNCTIONS & OPERATORS
     New FieldMerge functions and operatorsw can be easily written inside the PreprocessBlock() and PostProcessBlock() functions. Functions and operators can create any parameter
     structure required in the ResultsMap, and process them as needed using the BLOCKNAME attribute for postprocessing.
