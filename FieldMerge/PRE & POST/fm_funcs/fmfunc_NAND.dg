@@ -1,0 +1,24 @@
+string standalone.fmfunc_NAND(boolean IsPRE, String strIndex)
+{
+// USAGE
+//  standalone.fmfunc_TEMPLATE(strIndex)
+//
+// NOTES
+//
+// TEST
+//
+// ERROR CHECKS
+if(isblank(strIndex))
+{
+	return "";
+}
+//
+// DEFAULTS
+//
+// VARIABLES
+i = strIndex.toList();
+m = Map();
+//
+// FUNCTION
+return m;
+}

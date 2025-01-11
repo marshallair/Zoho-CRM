@@ -81,13 +81,9 @@ for each index i in counter
 		// both delimiters found
 		BlockProcess = if(OpenDelimiterLocation < ClosedDelimiterLocation && LastDelimiterWasOpen,1,if(OpenDelimiterLocation < ClosedDelimiterLocation && !LastDelimiterWasOpen,2,if(OpenDelimiterLocation > ClosedDelimiterLocation && LastDelimiterWasOpen,3,if(OpenDelimiterLocation > ClosedDelimiterLocation && !LastDelimiterWasOpen,4,null))));
 	}
-	info "BlockProcess: " + if(BlockProcess == 1,"NewEblock",if(BlockProcess == 2,"NewSblock",if(BlockProcess == 3,"EndSblock",if(BlockProcess == 4,"EndEblock","ERROR IN BlockProcess (not equal to 1,2,3 or 4)")))) + " , OpenDelimiterLocation: " + OpenDelimiterLocation + " , ClosedDelimiterLocation: " + ClosedDelimiterLocation;
 	//
 	if(BlockProcess == NewEblock)
 	{
-		//default for each new block
-		BlockType = "BLOCK";
-		//>>>>>>>>>>>>>>>>>>>>>TEST FOR FUNCTIONS AND OPERATORS		
 		if(OpenDelimiterLocation > 0)
 		{
 			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
@@ -109,16 +105,13 @@ for each index i in counter
 			// just add a new level to CurrentIndex
 			CurrentIndex.add(0);
 			// Add preprocess key-value pairs to map
-			// ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
-			ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
+			ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
 			TextCursor = TextCursor + 1;
 		}
 		LastDelimiterWasOpen = true;
 	}
 	else if(BlockProcess == NewSblock)
 	{
-		//default for each new block
-		BlockType = "BLOCK";
 		if(OpenDelimiterLocation > 0)
 		{
 			// there is some preceding text - treat as a completed Sblock preceding current Sblock
@@ -128,8 +121,7 @@ for each index i in counter
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
 		// Add preprocess key-value pairs to map
-		// ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
-		ResultsMap.put(CurrentIndex.duplicate(0).toList(),BlockType);
+		ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
 		LastDelimiterWasOpen = true;
 	}
 	else if(BlockProcess == EndSblock)
@@ -140,12 +132,7 @@ for each index i in counter
 		// BlockType = ResultsMap.get(CurrentIndex.toList());
 		// info "BlockType = " + BlockType;
 		// info "ResultsMap.get(CurrentIndex) = " + ResultsMap.get(CurrentIndex.toList());
-		// ResultsMap.putAll(PostprocessBlock(ResultsMap,Index).toMap());
-		if(BlockType == "BLOCK")
-		{
-			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = " + MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
-			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
-		}
+		ResultsMap.putAll(PostprocessBlock(ResultsMap,Index).toMap());
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
 		// info "END EndSblock processing -------------";

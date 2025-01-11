@@ -1,7 +1,7 @@
-string standalone.DeleteChildren(string strResultsMap,string strIndex)
+string standalone.ChildrenKeys(string strResultsMap,string strIndex)
 {
 // USAGE
-//  standalone.FuncName()
+//  standalone.ChildrenKeys(ResultsMap,CurrentIndex).toList()
 //
 // NOTES
 //

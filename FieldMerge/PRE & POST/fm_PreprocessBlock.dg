@@ -65,6 +65,7 @@ else if(standalone.IsBlockThisFunction("F",MergeText,BlockDelimiterLocation,Func
 else
 {
 	// plain block {}
+	m.put(Index,"BLOCK")
 }
 return m;
 }

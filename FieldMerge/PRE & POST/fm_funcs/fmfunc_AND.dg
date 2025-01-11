@@ -1,0 +1,40 @@
+string standalone.fmfunc_AND(boolean IsPRE, string MergeText, String strIndex, string ResultsMap)
+{
+// USAGE
+//  standalone.fmfunc_AND(true, MergeText, CurrentIndex, null).toMap()
+//  standalone.fmfunc_AND
+//
+// NOTES
+//
+// TEST
+//
+// ERROR CHECKS
+if(isblank(strIndex)||isnull(IsPRE))
+{
+	return "";
+}
+if(IsPRE)
+{
+	//
+	// DEFAULTS
+	//
+	// VARIABLES
+	i = strIndex.toList();
+	m = Map();
+	//
+	// FUNCTION
+	return m;
+}
+else
+{
+		//
+	// DEFAULTS
+	//
+	// VARIABLES
+	i = strIndex.toList();
+	m = Map();
+	//
+	// FUNCTION
+	return m;
+}
+}

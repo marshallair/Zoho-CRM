@@ -1,0 +1,68 @@
+string standalone.PostprocessBlock(string strResultsMap,string strIndex)
+{
+// USAGE:
+//  standalone.PostprocessBlock(ResultsMap,CurrentIndex).toMap()
+//
+// NOTES
+//  PostprocessBlock() takes the current ResultsMap and Index and then returns a key-value map containing VALUE_RESULT. 
+//      to be put() into the ResultsMap. Any child indices of KEY should then be deleted using DeleteChildren().
+//       
+// TEST
+//  Parameter1="TEST DATA";
+//  Parameter2=null;
+//
+// ERROR CHECKS
+//
+// DEFAULTS
+//
+// VARIABLES
+//
+// FUNCTION
+ResultsMap=strResultsMap.toMap();
+Index=strIndex.toList(",");
+BlockType=ResultsMap.get(Index);
+if(BlockType=="funcIF")
+{
+    // IF function
+    m.putAll(standalone.fmfunc_IF(Index).toMap());
+}
+else if(BlockType=="funcAND")
+{
+    // AND function
+}
+else if(standalone.IsBlockThisFunction(BlockType=="funcNAND")
+{
+    // NAND function
+}
+else if(BlockType=="FIELD")
+{
+    // Field (F) function (simplified Field ${} must be evaluated last to make sure it doesn't match any other functions)
+}
+else if(BlockType == "BLOCK")
+{
+    // simple BLOCK container. Concatenate any embedded blocks
+    s="";
+    looper = Leftpad("1",ResultsMap.size()).replaceAll(" ","1,").toList();
+    /*THIS IS FUNCTIONALLY A WHILE BUT ONLY IF looper contains at least as many items as you need to evaluate your series. It maxes out with n=66665. It may max out at a lower number with more code. and returns the following error:
+        Failed to execute function
+        The limit of Statement has reached its maximum 200000 Line Number:13
+    */
+    for each index i in looper
+    {
+        // loop through all embedded blocks
+        TempIndex=Index.duplicate();
+        TempIndex.add(i);
+        if(ResultsMap.containKey(TempIndex))
+        {
+            // there is an embedded block at this index
+            s=s+ResultsMap.get(TempIndex);
+        }
+        else
+        {
+            break;
+        }
+    }
+
+}
+
+}
