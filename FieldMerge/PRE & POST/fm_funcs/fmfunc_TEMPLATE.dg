@@ -1,4 +1,4 @@
-string standalone.fmfunc_TEMPLATE(boolean IsPRE, String strIndex)
+string standalone.fmfunc_TEMPLATE(bool isPRE, String strIndex, string strResultsMap)
 {
 // USAGE
 //  standalone.fmfunc_TEMPLATE(strIndex)

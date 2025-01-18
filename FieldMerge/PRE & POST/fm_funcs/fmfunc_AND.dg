@@ -1,4 +1,4 @@
-string standalone.fmfunc_AND(boolean IsPRE, string MergeText, String strIndex, string ResultsMap)
+string standalone.fmfunc_AND(bool isPRE, String strIndex, string strResultsMap)
 {
 // USAGE
 //  standalone.fmfunc_AND(true, MergeText, CurrentIndex, null).toMap()

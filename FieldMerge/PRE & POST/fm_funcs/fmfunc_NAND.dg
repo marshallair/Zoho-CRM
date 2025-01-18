@@ -1,4 +1,4 @@
-string standalone.fmfunc_NAND(boolean IsPRE, String strIndex)
+string standalone.fmfunc_NAND(bool isPRE, String strIndex, string strResultsMap)
 {
 // USAGE
 //  standalone.fmfunc_TEMPLATE(strIndex)

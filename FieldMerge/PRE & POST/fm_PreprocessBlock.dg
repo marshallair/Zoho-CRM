@@ -1,7 +1,7 @@
-string standalone.PreprocessBlock(String MergeText, String strIndex, Int BlockDelimiterLocation, String OpenDelimiter,String CloseDelimiter,String FunctionCharacter)
+string standalone.PreprocessBlock(String Text, String strIndex, int OpenDelimiterLocation, String CloseDelimiter,String FunctionCharacter)
 {
 // USAGE
-//  standalone.PreprocessBlock(MergeText,Index).toMap()
+//  standalone.PreprocessBlock(MergetText,Index,OpenDelimiter,CloseDelimiter,FunctionCharacter).toMap()
 //
 // NOTES
 //  Processes Text starting from position 0 as the next block. Returns a map string that needs added to ResultsMap, with a block type always starting first, then preload blocks, such as:
@@ -9,14 +9,13 @@ string standalone.PreprocessBlock(String MergeText, String strIndex, Int BlockDe
 //  Care needs taken to add the blocktype block and the preload blocks to ResultsMap immediately after calling this function.
 //
 // TEST
-MergeText = "$F${id,ID: {$},missing}";
-Cursor = 3;
-Index = {0,0,1};
+// Text = "$F${id,ID: {$},missing}";
+// Index = {0,0,1};
 //
 // ERROR CHECKS
-if(isblank(MergeText))
+if(isblank(Text))
 {
-	return "MergeText is blank when passed to PreprocessBlock()";
+	return "Text is blank when passed to PreprocessBlock()";
 }
 if(isblank(strIndex))
 {
@@ -41,31 +40,45 @@ m = Map();
 Index = strIndex.toList();
 //
 // FUNCTION
+//
 // Every function and operator is evaluated. To add new operators or functions, add them here, minding their order if necessary, and call their associated standalone function.
-if(standalone.IsBlockThisFunction("IF",MergeText,BlockDelimiterLocation,FunctionCharacter))
+	if(standalone.IsBlockThisFunction("IF",Text,BlockDelimiterLocation,FunctionCharacter))
 {
 	// IF function
-	m.putAll(standalone.fmfunc_IF(Index).toMap());
+	m.putAll(standalone.fmfunc_IF(true,Index,null).toMap());
 }
-else if(standalone.IsBlockThisFunction("AND",MergeText,BlockDelimiterLocation,FunctionCharacter))
+else if(standalone.IsBlockThisFunction("AND",Text,BlockDelimiterLocation,FunctionCharacter))
 {
 	// AND function
-	m.putAll(standalone.fmfunc_AND(Index,standalone.SequentialBlockCount(MergeText.mid(BlockDelimiterLocation+1,null,null)).toLong()).toMap());
+	m.putAll(standalone.fmfunc_AND(true,Index,null).toMap());
 }
-else if(standalone.IsBlockThisFunction("NAND",MergeText,BlockDelimiterLocation,FunctionCharacter))
+else if(standalone.IsBlockThisFunction("NAND",Text,BlockDelimiterLocation,FunctionCharacter))
 {
 	// NAND function
-	m.putAll(standalone.fmfunc_NAND(Index).toMap());
+	m.putAll(standalone.fmfunc_NAND(true,Index,null).toMap());
 }
-else if(standalone.IsBlockThisFunction("F",MergeText,BlockDelimiterLocation,FunctionCharacter) || upper(MergeText.mid(BlockDelimiterLocation - 1,BlockDelimiterLocation)) == FunctionCharacter)
+else if(standalone.IsBlockThisFunction("F",Text,BlockDelimiterLocation,FunctionCharacter) || upper(Text.mid(BlockDelimiterLocation - 1,BlockDelimiterLocation)) == FunctionCharacter)
 {
-	m.putAll(standalone.fmfunc_FIELD(Index).toMap());
+	m.putAll(standalone.fmfunc_FIELD(true,Index,null).toMap());
 	// Field (F) function (simplified Field ${} must be evaluated last to make sure it doesn't match any other functions)
 }
 else
 {
 	// plain block {}
-	m.put(Index,"BLOCK")
+	m.put(Index,"BLOCK");
 }
+//
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// Check for preceding text
+if(OpenDelimiterLocation > 0)
+{
+	ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor, OpenDelimiterLocation + TextCursor));
+	CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+}
+//
+// Add preprocess key-value pairs to map
+ResultsMap.putAll(standalone.PreprocessBlock(MergeText.mid(cursor,OpenDelimiterLocation+1), CurrentIndex, OpenDelimiter, CloseDelimiter, FunctionCharacter).toMap());
+//
+
 return m;
 }

@@ -6,11 +6,15 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 //  NOTE: MergeText requires double escapes (\\) for delimiters (e.g. \\{ ) and function character (e.g \\$) if trying to use as literal
 // 		characters, AND if Zoho has turned on \n for your instance of CRM. Not needed if you haven't requested \n to be turned on.
 //		The reason for this is that Deluge with escaped strings turned on only recognizes \\, \t, \n, \", and \'//
+//  NOTE: Deluge maps with an a list used as key value(s) apparently use an internal pointer or something. We have to "clone" the list to use it using duplicate().
+// 		Otherwise, it changes the map variable when we change the value of CurrentIndex! Also, without using toList() with this function, occasionally the new index
+// 		elements are converted to strings (another bug), such as ["0","1"] instead of [0,1], for example. Therefore, we always use listvar.duplicate(0).toList() 
+// 		when assigning a list to a map key...
 // TEST:
 //	MergeText="My name is {${PersTitle} $FIELD${Fname} ${Lname}}, ${JobTitle}.";
 //	Data={"PersTitle":"Mr.","Fname":"Marshall","Lname":"Henley","JobTitle":"Programmer"};
 // 	MergeText = "Marshall {Henley {is the best man }}at my wedding.";
-MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wedding}.";
+//  MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wedding}.";
 //	MergeText = "Marshall Henley {is the }{best}";
 //
 // ERROR HANDLING:
@@ -32,7 +36,6 @@ if(FunctionCharacter == "")
 	FunctionCharacter = "$";
 }
 //
-// FUNCTION:
 // Variables (int BlockProcess defined later)
 MergeText = OpenDelimiter + MergeText + CloseDelimiter;
 ResultsMap = Map();
@@ -42,28 +45,26 @@ CurrentIndex = List();
 IsArgument = false;
 End = MergeText.len() - 1;
 ResultText = "";
+// these are used for readability, below
 NewEblock = 1;
 NewSblock = 2;
 EndSblock = 3;
 EndEblock = 4;
 //
-// START LOOPING TO FIND FIELDS AND PROCESS (lame way of doing while loops in Deluge - must break to exit)
+// FUNCTION
+// Loop to find blocks (lame way of do/while loops in Deluge - must break to exit)
 counter = leftpad("1",MergeText.Len().toLong()).replaceAll(" ","1,").toList();
 for each index i in counter
 {
-	// Use replaceall to ignore escaped delimiters
+	// Use replaceall on string Temp to ignore escaped delimiters and do location tracking for delimiters on Temp
 	Temp = MergeText.mid(TextCursor).replaceAll('\' + OpenDelimiter,"__",true).replaceAll('\' + CloseDelimiter,"__",true);
 	OpenDelimiterLocation = Temp.find(OpenDelimiter);
 	ClosedDelimiterLocation = Temp.find(CloseDelimiter);
 	//
-	// info "Pass(i): " + i + " of " + End + " , TextCursor: " + TextCursor + " , OpenDelimiterLocation: " + OpenDelimiterLocation + " , ClosedDelimiterLocation: " + ClosedDelimiterLocation;
-	// info "Text from TextCursor to end: " + MergeText.mid(TextCursor);
-	// 
 	// Process which delimiter was found first and therefore which block type based on last delimiter found
 	if(OpenDelimiterLocation < 0 && ClosedDelimiterLocation < 0)
 	{
 		// THIS SHOULD NEVER HAPPEN DUE TO MergeText=OpenDelimiter+MergeText+CloseDelimiter above
-		// info "BREAKING ON DELIMITER NOT FOUND - THIS SHOULD NEVER HAPPEN";
 		break;
 	}
 	else if(OpenDelimiterLocation < 0)
@@ -84,30 +85,16 @@ for each index i in counter
 	//
 	if(BlockProcess == NewEblock)
 	{
-		if(OpenDelimiterLocation > 0)
-		{
-			// there is some preceding text - add new level to CurrentIndex, place text there, then make next block sequential
-			CurrentIndex.add(0);
-			// NOTE: Deluge maps with an a list used as key value(s) apparently use an internal pointer or something. We have to "clone" the list to use it using duplicate().
-			// Otherwise, it changes the map variable when we change the value of CurrentIndex! Also, without using toList() with this function, occasionally the new index
-			// elements are converted to strings (another bug), such as ["0","1"] instead of [0,1], for example. Therefore, we always use listvar.duplicate(0).toList() 
-			// when assigning a list to a map key...
-			//
-			// Add preprocess key-value pairs to map
-			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
-			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
-			ResultsMap.putAll(PreprocessBlock(true, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
-			// ResultsMap.put(CurrentIndex.duplicate(0).toList().toList(),BlockType);
-			TextCursor = TextCursor + OpenDelimiterLocation + 1;
-		}
-		else
-		{
-			// just add a new level to CurrentIndex
-			CurrentIndex.add(0);
-			// Add preprocess key-value pairs to map
-			ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
-			TextCursor = TextCursor + 1;
-		}
+		// Add a new Embedded level to index
+		CurrentIndex.add(0);
+		//
+		// Add preprocess key-value pairs to map
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// NEED SOME WAY TO REESTABLISH THE NEW CUrrentIndex after the following
+		ResultsMap.putAll(standalone.PreprocessBlock(MergeText.mid(cursor,OpenDelimiterLocation+1), CurrentIndex, OpenDelimiter, CloseDelimiter, FunctionCharacter).toMap());
+		//
+		// update processing vars
+		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		LastDelimiterWasOpen = true;
 	}
 	else if(BlockProcess == NewSblock)
@@ -121,21 +108,14 @@ for each index i in counter
 		TextCursor = TextCursor + OpenDelimiterLocation + 1;
 		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
 		// Add preprocess key-value pairs to map
-		ResultsMap.putAll(PreprocessBlock(BlockProcess, MergeText,TextCursor-1,CurrentIndex,null,null,null).toMap());
+		ResultsMap.putAll(standalone.PreprocessBlock(MergeText,CurrentIndex,TextCursor-1,OpenDelimiter,CloseDelimiter,FunctionCharacter).toMap());
 		LastDelimiterWasOpen = true;
 	}
 	else if(BlockProcess == EndSblock)
 	{
-		// info "START EndSblock processing -------------";
-		// info ResultsMap;
-		// info "CurrentIndex = " + CurrentIndex.toList();
-		// BlockType = ResultsMap.get(CurrentIndex.toList());
-		// info "BlockType = " + BlockType;
-		// info "ResultsMap.get(CurrentIndex) = " + ResultsMap.get(CurrentIndex.toList());
-		ResultsMap.putAll(PostprocessBlock(ResultsMap,Index).toMap());
+		ResultsMap.putAll(standalone.PostprocessBlock(ResultsMap,CurrentIndex).toMap());
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
-		// info "END EndSblock processing -------------";
 	}
 	else if(BlockProcess == EndEblock)
 	{
@@ -143,27 +123,18 @@ for each index i in counter
 		if(ClosedDelimiterLocation > 0)
 		{
 			// there is some ending text - treat as a completed Sblock preceding current Sblock
-			info "THERE IS SOME REMAINING TEXT AFTER LAST SEQUENTIAL BLOCK EMBEDDED WITHIN THIS BLOCK";
-			info "MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor) = " + MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor);
 			CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList();
 			ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
-			info ResultsMap;
 		}
 		ParentBlockKey = standalone.ParentBlockKey(ResultsMap).toList(",");
-		info "ParentBlockKey: " + ParentBlockKey;
 		BlockType = standalone.ParentBlockValue(ResultsMap);
-		info "BlockType = " + BlockType;
 		Indices = standalone.ParentSubIndices(ResultsMap).toList("|");
-		info "Processing End Embedded Block. Indices = " + Indices;
 		if(BlockType = "BLOCK")
 		{
 			ResultsMap.put(ParentBlockKey.duplicate().toList(),"");
 			// iterate through concatenation of each sub block
 			for each  x in Indices
 			{
-				// info x;
-				// info "ResultsMap.get(x.toList()) = " + ResultsMap.get(x.toList());
-				// concatenate at parent level and remove map
 				ResultsMap.put(ParentBlockKey.toList(),ResultsMap.get(ParentBlockKey.toList()) + ResultsMap.get(x.toList()));
 				ResultsMap.remove(x.toList());
 			}
@@ -173,12 +144,9 @@ for each index i in counter
 		TextCursor = TextCursor + ClosedDelimiterLocation + 1;
 		LastDelimiterWasOpen = false;
 	}
-	// info "ResultsMap AFTER processing is: " + ResultsMap;
-	// info "TextCursor AFTER processing is: " + TextCursor + " , End: " + End;
 	if(TextCursor > End)
 	{
 		// we're done
-		// info "!!! BREAKING ON TEXT CURSOR = " + TextCursor;
 		break;
 	}
 }
@@ -187,6 +155,5 @@ if(ResultText == "BLOCK")
 {
 	ResultText = "{ERROR:\"001 MISMATCHED BRACKETS\"}";
 }
-info ResultText;
 return standalone.EscapeCharacters(ResultText,OpenDelimiter + CloseDelimiter + FunctionCharacter);
 }

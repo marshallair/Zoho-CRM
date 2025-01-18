@@ -2,10 +2,8 @@ string standalone.PostprocessBlock(string strResultsMap,string strIndex)
 {
 // USAGE:
 //  standalone.PostprocessBlock(ResultsMap,CurrentIndex).toMap()
-//
 // NOTES
-//  PostprocessBlock() takes the current ResultsMap and Index and then returns a key-value map containing VALUE_RESULT. 
-//      to be put() into the ResultsMap. Any child indices of KEY should then be deleted using DeleteChildren().
+//  PostprocessBlock() takes the current ResultsMap and Index and then returns a key-value map containing "Index".
 //       
 // TEST
 //  Parameter1="TEST DATA";
@@ -18,19 +16,20 @@ string standalone.PostprocessBlock(string strResultsMap,string strIndex)
 // VARIABLES
 //
 // FUNCTION
+m=map();
 ResultsMap=strResultsMap.toMap();
 Index=strIndex.toList(",");
 BlockType=ResultsMap.get(Index);
 if(BlockType=="funcIF")
 {
     // IF function
-    m.putAll(standalone.fmfunc_IF(Index).toMap());
+    m.putAll(standalone.fmfunc_IF(false,Index,ResultsMap).toMap());
 }
 else if(BlockType=="funcAND")
 {
     // AND function
 }
-else if(standalone.IsBlockThisFunction(BlockType=="funcNAND")
+else if(BlockType=="funcNAND")
 {
     // NAND function
 }
@@ -64,5 +63,5 @@ else if(BlockType == "BLOCK")
     }
 
 }
-
+Return m;
 }
