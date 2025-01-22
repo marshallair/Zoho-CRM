@@ -88,16 +88,57 @@ FieldMerge() OPERATION
     Blocks that are parameters can contain other blocks, and so on. A block inside another block is called an embedded block. A block folowing another block is called as sequential block.
     By definition, a list of parameters for a function block would require that block to process a series of sequential blocks as parameters.
 
-    Because Deluge does not support recursion, and FieldMerge is intended to support unlimited block nesting, a List (Index) is used as an Key value in a Map (ResultsMap) to build the nested evaluations
-    into a structure, then remove them from the structure when evaluated. BLOCKTYPE values are placed in the new ResultsMap entries until the block is complete, then processed based on the BLOCKTYPE
-    found.
+    FieldMerge() can also discern "chunks" which are pieces of text not formally within a block. They are considered static blocks of text. Some are ignored if found in certain functions.
+    An example distinguishing blocks from chunks would be: {This is a block, }but this is a chunk.{ This is another block}, while this is another chunk.
 
     THE ALGORITHM
+    Because Deluge in CRM does not support recursion, and unlimited string lengths as parameters are allowed, and FieldMerge is intended to support unlimited block nesting,
+    a List (considered an Index) is used as an Key value in a Map (ResultsMap) to build the nested evaluations into a structure, then remove them from the structure when evaluated.
+    BLOCKTYPE values are placed in the new ResultsMap entries until the block is complete, then processed based on the BLOCKTYPE found, as well as function parameters and their defaults.
+
+    Chunks, when found, are either ignored (with some functions) or treated as plain sequential blocks of static text.
+
+    ResultsMap, a map with the indexed block key-value map, as well as key-values for all pertinant processing is used. ResultsMap also carries the data. It is established in the FieldMerge()
+    function and then passed to subsequent standalone function calls, and then passed back as the result.
+
+    The root index in the block map for ResultsMap is [0] (as opposed to what it contains, such as {[0,1],[0,2]...[0,n]}). When processing is finished, the only key-value left should be
+    ResultsMap.get([0]) and therefore this is what is used to return the value of FieldMap() upon completion, barring errors being passed back.
+
+    Because escaping of the block delimiters and field characters are allowed, there is a function to handle this, too, EscapeCharacters().
+
+    Within FieldMerge(), there is a container function, ProcessBlock(), which can be modified to call "fmfunc_" functions (see below) to implement new
+    functions or arguments and expand the abilities of FieldMerge. ProcessBlock() calls these fmfunc_ functions (see below) to create
+    the map entries when the first parameter of ProcessBlock is true (herafter called PRE), and then process the map values into a final result during
+    ProcessBlock(false,...) ("POST" hereafter). To simplify the mapping and processing of key-value pairs, both ProcessBlock and fmfunc_ functions during
+    PRE and POST, fmfunc_ functions actually effectively two functions, one for PRE, and one for POST. These were kept in one function to allow quick edits
+    to both the pre and post versions as function parameters are added, etc. To clarify...
+
+    This appraoch allows nesting of blocks{} but also blocks{} within argument blocks withing blocks{}, ad infinitum. It just evaluates the current block as
+    a container (process now) or an argument (evaluate now and store in list for later).
+
+    When StackLevel is at 0, we know we are at base level and whatever comes from that evaluation is concatenated (appended) to the existing output.
+
+    In theory, an unlimited number of functions and operators can be defined, nested in unlimited fashion, and processed without recursion.
+
+FUNCTIONAL RESPONSIBILITIES
+FieldMerge()
     FieldMerge processes the entire MergeText string using looped searches for the OpenDelimiter and CloseDelimiter characters (hereafter we'll just used { and } to refer to these,
-    although they can be changed as parameters in FieldMerge). If "{" is found, then it is assumed to begin a block and is processed using PreprocessBlock().
-    
-        PreprocessBlock()
-        PreprocessBlock() looks to see if it's a function block, or is preceded by an operator, and then proceeds to appendi to the map with BLOCKTYPES and/or default values in the map, ResultsMap with list Index as key.
+    although they can be changed as parameters in FieldMerge). If "{" or "}" is found, then a block is begun or ended and is processed using ProcessBlock(). Blocks need to be discerned
+    as being sequential or embedded, so the LastDelimiterWasOpen boolean is used to make that determination. A { following a { is embedded. A { following a } is sequential.
+    A } following a } is the end of an embedded. A } following a { is the end of a sequential. FieldMerge() is concerned with:
+    - Looping to find the beginning or end of blocks
+    - Discerning what type of block is being begun or ended.
+    - Loading ResultsMap with the necessary information each loop to be processed, including the type of processing to be done
+        (start or end a sequential  or embedded block, established by an integer 1 through 4 stored in BlockProcess).
+
+ProcessBlock()
+    ProcessBlock() is concerned with:
+    - Defining the "chunk" (the text, if any, between the last delimiter and the one just found), placing it in ResultsMap,
+    - Discerning which processing is to be done by passing it off to the correct fmfunc_ function for pre or post processing.
+    - Resetting the cursor when done.
+
+        ProcessBlock() with IsPRE==true
+        ProcessBlock() looks to see if it's a function block, or is preceded by an operator, and then proceeds to appendi to the map with BLOCKTYPES and/or default values in the map, ResultsMap with list Index as key.
         FieldMerge() "functions and operators" are processed at this time. These can be added by creating the functions as standalones that are accessed by PreprocessBlock() and PostprocessBlock().
         The List used as key values for the ResultsMap, and the MergeText immediately preceding the { is parsed to determine if the block{}
         is a function, or is preceded by an operator.
@@ -108,78 +149,37 @@ FieldMerge() OPERATION
 
         If a function is not identified, the block is processed as a container of text or other blocks in heirarchy.
 
-        PostprocessBlock()
+        ProcessBlock() with IsPRE==false
         Once a } is found, the current block operation is completed by Postprocess block, looking at the value in the block and the text in MergeText. The current ResultsMap values are then replaced
         by the result of the functions called by PostprocessBlock().
 
         If a "}" is found after a preceding "}", then we know the block being concluded contains one or more embedded blocks. Each block in the sequence is evaluated based on BLOCKTYPE
         and the results are placed in the finished block value, with the embedded block values being deleted. Sometimes, block values are ignored, such as when an IF condition is true or false,
         and PostprocessBlock will send a delete Index list back to FieldMerge() to stop unnecessary processing of blocks.
-    
-    If an evaluated value is left in the stack, then this becomes something that can be passed back "up the stack" on subsequent passes. This allows for multiple
-    list items to be considered ordered arguments for a function several list items earlier. Upon the last argument being evaluated, the ending function code
-    will pass back and "pop" all the values until the function has been completely evaluated, which, in turn, then replaces the function identifyer in the stack
-    with its return value, and the process continues.
+        PostprocessBlock()
 
-    This appraoch allows nesting of blocks{} but also blocks{} within argument blocks withing blocks{}, ad infinitum. It just evaluates the current block as
-    a container (process now) or an argument (evaluate now and store in list for later).
+        If an evaluated value is left in the ResultsMap, then this becomes something that can be passed back "up the stack" on subsequent passes. This allows for multiple
+        list items to be considered ordered arguments for a function several list items earlier. Upon the last argument being evaluated, the ending function code
+        will pass back and "pop" all the values until the function has been completely evaluated, which, in turn, then replaces the function identifyer in the stack
+        with its return value, and the process continues.
 
-    When StackLevel is at 0, we know we are at base level and whatever comes from that evaluation is concatenated (appended) to the existing output.
+fmfnc_ FUNCTIONS
+    fmfunc_ functions are concerned with:
+    - If IsPRE is true, loading ResultsMap with key-maps to be processed later in post processing, checking first to see if
+        they already exist (in the case of an argument, to a function, for example).
+    - If IsPRE is false, processing the block just completed with the information as defined in it's block text, and collapsing/
+        processing any remaining embedded blocks within the current block. Once an end of block is processed, there should never be
+        any remaining embedded blocks entries (children of that block) in ResultsMap.
 
-    When the entire MergeText has been evaluated, the final output string is returned.
-
-    In theory, an unlimited number of functions and operators can be defined, nested in unlimited fashion, and processed WITHOUT requiring recursion.
-
-    Within FieldMerge(), there is a container function, ProcessBlock(), which can be modified to call "fmfunc_" functions (see below) to implement new
-    functions or arguments and expand the abilities of FieldMerge. ProcessBlock() calls these fmfunc_ functions (see below) to create
-    the map entries when the first parameter of ProcessBlock is true (herafter called PRE), and then process the map values into a final result during
-    ProcessBlock(false,...) ("POST" hereafter). To simplify the mapping and processing of key-value pairs, both ProcessBlock and fmfunc_ functions during
-    PRE and POST, fmfunc_ functions actually effectively two functions, one for PRE, and one for POST. These were kept in one function to allow quick edits
-    to both the pre and post versions as function parameters are added, etc.
-    
-    To aid in discerning certain processing conditions, there are block counting functions, BlockCount(), SequentialBlockCount(), and BlockDepth().
-
-        ProcessBlock(true,...)  PRE
-        ProcessBlock(true) looks to see if it's a function block, or is preceded by an operator, and then proceeds to append to the map with BLOCKTYPES and/or default values in the map.
-        FieldMerge() "functions and operators" are processed at this time. An index is passed to during PRE to start the indexing at the right place. The number of sequential blocks
-        is also passed as needed.
-
-        Operators are treated like functions, in that they can be processed in the above manner. However, for binary operators, the previous ResultsMap sequential block value is going to be used,
-        and therefore the current list item evaluation must also use the previous list item in the evaluation. For unary operators, they are simply treated like functions
-        during evaluation. All the standalone procesessing functions called by PreprocessBlock() should have a prefix of "fmfunc_", for clarity.
-
-        If a function is not identified, the block is processed as a container of text or other blocks in heirarchy.
-
-        ProcessBlock(false,...) POST
-        Once a } is found, the current block operation is completed by ProcessBlock(false,...), looking at the value in the block and the text in MergeText. The current ResultsMap values are then replaced
-        by the result of the functions called by PostprocessBlock().
-
-        If a "}" is found after a preceding "}", then we know the block being concluded contains one or more embedded blocks. Each block in the sequence is evaluated based on BLOCKTYPE
-        and the results are placed in the finished block value, with the embedded block values being deleted. Sometimes, block values are ignored, such as when an IF condition is true or false,
-        and PostprocessBlock will send a delete Index list back to FieldMerge() to stop unnecessary processing of blocks.
-
-        PRE and POST (fmfunc_) functions
-        fmfunc_ Functions are what create the map entries to add to ResultsMap in FieldMerge during PreprocessBlock() ("PRE" hereafter), and
-        then process the map values during PostprocessBlock ("POST" hereafter). These function names are preceeded by "fmfunc_" as a convention.
-        They return a map that is placed in ResultsMap using putAll().
-
-        To simplify the mapping and processing of key-value entries as parameters during PRE and POST, fmfunc_ functions actually contain
-        two functions, one for PRE, and one for POST. The first argument for an fmfunc_ is always a boolean IsPRE, with 'true'
-        branching to process the PRE func, and false processing the POST func.
-        
-        Other than IsPRE, PRE functions take the CurrentIndex value as the next parameter. All PRE functions start the key-value
-        mapping with the passed value for CurrentIndex, then they add argument key-value pairs that contain either block names of
-        the parameters, or defaults, or both, depending on what the associated POST func will require to finish processing.
-
-        For functions that have unlimited arguments, such as AND, NAND, OR, NOR, etc, they are called with a third parameter, an
-        integer ParameterCount which identifies how many arguments to add, established at calling by using the SequentialBlockCount() function.
-
-
-FieldMerge() serves a similar purpose to ConcatFields, in that it mixes field data with string literals to create an output. Eventually, I'll get rid of ConcatFields() altogether.
+OTHER STANDALONE FUNCTIONS
+To aid in discerning certain processing conditions, there are block counting functions, BlockCount(), SequentialBlockCount(), and BlockDepth().
 
 ----------------------------------------
 
 ConcatFields()
+
+    FieldMerge() serves a similar purpose to ConcatFields, in that it mixes field data with string literals to create an output. Eventually, we will get rid of ConcatFields() altogether.
+
 ConcatFields() is standalone function that retrieves a list of fields and concatenates them
  with while using a formatting string (labels and line breaks, typically, but any can be used). A simplified version can be used that just outputs field names
  for labels with a colon and space appended is, field values next, followed by the default line break text. This is the default when

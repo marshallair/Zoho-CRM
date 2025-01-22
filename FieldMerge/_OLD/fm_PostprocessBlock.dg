@@ -1,5 +1,9 @@
-string standalone.PostprocessBlock(string strResultsMap,string strIndex)
+string standalone.PostprocessBlock(string strResultsMap)
 {
+// *************************
+// ****** DEPRECATED *******
+// *************************
+//
 // USAGE:
 //  standalone.PostprocessBlock(ResultsMap,CurrentIndex).toMap()
 // NOTES
@@ -8,6 +12,19 @@ string standalone.PostprocessBlock(string strResultsMap,string strIndex)
 // TEST
 //  Parameter1="TEST DATA";
 //  Parameter2=null;
+//
+// ResultsMap structure used for most function interfaces
+// ResultsMap = Map();
+// ResultsMap.put("ind",null); // CurrentIndex
+// ResultsMap.put("od",OpenDelimiter); 
+// ResultsMap.put("cd",CloseDelimiter);
+// ResultsMap.put("fc",FunctionCharacter);
+// ResultsMap.put("o_loc",-1); // OpenDelimiterLocation
+// ResultsMap.put("c_loc",-1); // ClosedDelimiterLocation
+// ResultsMap.put("txt",MergeText);
+// ResultsMap.put("end",End);
+// ResultsMap.put("curs",0) // TextCursor
+// ResultsMap.put("chunk",""); // CurrentChunk
 //
 // ERROR CHECKS
 //

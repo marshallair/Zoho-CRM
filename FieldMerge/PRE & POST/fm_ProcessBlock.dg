@@ -1,0 +1,87 @@
+string standalone.PreprocessBlock(strResultsMap)
+{
+// USAGE
+//  ResultsMap=standalone.PreprocessBlock(ResultsMap).toMap()
+//
+// NOTES
+//  Processes MergeText ( ResultsMap.get("txt") ) starting from Cursor ( ResultsMap.get("curs") ) as the next block.
+//  Returns the modified ResultsMap, adding, for example, in the case of an IF function:
+//  	{"blocktype":"IF_RESULT","preload_blocks":{[0,1,3,0]:"IF_COND",[0,1,3,1],[0,1,3,2]:"IF_TRUE",[0,1,3,3]:"IF_FALSE"}}
+//
+// TEST
+// Text = "$F${id,ID: {$},missing}";
+// Index = {0,0,1};
+//
+// //	ResultsMap structure used for most function interfaces
+// ResultsMap = Map();
+// ResultsMap.put("od",OpenDelimiter); 			// doesn't change, single character
+// ResultsMap.put("cd",CloseDelimiter); 			// doesn't change, single character
+// ResultsMap.put("fc",FunctionCharacter); 		// doesn't change, single character
+// ResultsMap.put("txt",MergeText); 				// doesn't change, string
+// ResultsMap.put("end",End); 						// doesn't change, integer
+// //	these change on each parse cycle below:
+// ResultsMap.put("o_loc",-1); 					// OpenDelimiterLocation integer
+// ResultsMap.put("c_loc",-1); 					// ClosedDelimiterLocation integer
+// ResultsMap.put("curs",0) 						// TextCursor integer
+// ResultsMap.put("chunk","");						// CurrentChunk string
+// ResultsMap.put("bp",0);							// BlockProcess integer
+//
+// ERROR CHECKS
+//
+// VARIABLES
+ResultsMap = strResultsMap.toMap();
+CurrentIndex=ResultsMap.get("ind").toList(",");
+BlockProcess=ResultsMap.get("bp");
+FunctionCharacter=ResultsMap.get("fc");
+//
+// these are used for readability
+NewEmbeddedBlock = 1;
+NewSequentialBlock = 2;
+EndSequentialBlock = 3;
+EndEmbeddedBlock = 4;
+//
+// Process block next step based on what was found
+if(BlockProcess < 3)
+{
+	// store the chunk
+	ResultsMap.put("chunk",ResultsMap.get("text").mid(ResultsMap("curs"),ResultsMap("o_loc")-1));
+	// update cursor
+	e.put("curs",ResultsMap.get("curs") + ResultsMap.get("o_loc") + 1);
+}
+else
+{
+	// store the chunk
+	ResultsMap.put("chunk",ResultsMap.get("text").mid(ResultsMap("curs"),ResultsMap("c_loc")-1));
+	// update cursor
+	ResultsMap.put("curs",ResultsMap.get("curs") + ResultsMap.get("c_loc") + 1);
+}
+//
+// Every function and operator is evaluated. To add new operators or functions, add them here, minding their order if necessary, and call their associated standalone function.
+// IF function
+if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"IF"+FunctionCharacter))
+{
+	ResultsMap=standalone.fmfunc_IF(true,ResultsMap).toMap();
+}
+// AND function
+else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"AND"+FunctionCharacter))
+{
+	ResultsMap=standalone.fmfunc_AND(true,ResultsMap).toMap();
+}
+else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"NAND"+FunctionCharacter))
+// NAND function
+{
+	ResultsMap=standalone.fmfunc_NAND(true,ResultsMap).toMap();
+}
+// FIELD function - this must come second to last due to looking for a single FunctionCharacter (short version) that is not part of another function
+else if( (ResultsMap.get("chunk").endsWith(FunctionCharacter+"F"+FunctionCharacter)) || (ResultsMap.get("chunk").endsWith(FunctionCharacter)) )
+{
+	ResultsMap.putAll(standalone.fmfunc_FIELD(true,ResultsMap).toMap();
+}
+// plain "container" blocks last
+else
+{
+// NEED TO PROCESS HERE - NO NEED FOR STANDALONE FUNCTION I THINK
+}
+
+return ResultsMap;
+}

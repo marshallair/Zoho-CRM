@@ -1,4 +1,4 @@
-string standalone.fmfunc_IF(bool isPRE, String strIndex, string strResultsMap)
+string standalone.fmfunc_IF(bool isPRE, string strResultsMap)
 {
 // USAGE
 //  standalone.fmfunc_TEMPLATE(strIndex)
@@ -6,6 +6,19 @@ string standalone.fmfunc_IF(bool isPRE, String strIndex, string strResultsMap)
 // NOTES
 //
 // TEST
+//
+// ResultsMap structure used for most function interfaces
+// ResultsMap = Map();
+// ResultsMap.put("ind",null); // CurrentIndex
+// ResultsMap.put("od",OpenDelimiter); 
+// ResultsMap.put("cd",CloseDelimiter);
+// ResultsMap.put("fc",FunctionCharacter);
+// ResultsMap.put("o_loc",-1); // OpenDelimiterLocation
+// ResultsMap.put("c_loc",-1); // ClosedDelimiterLocation
+// ResultsMap.put("txt",MergeText);
+// ResultsMap.put("end",End);
+// ResultsMap.put("curs",0) // TextCursor
+// ResultsMap.put("chunk",""); // CurrentChunk
 //
 // ERROR CHECKS
 if(isblank(strIndex))
