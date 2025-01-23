@@ -38,7 +38,7 @@ if(FunctionCharacter == "")
 //
 // VARIABLES
 MergeText = OpenDelimiter + MergeText + CloseDelimiter;
-LastDelimiterWasOpen = true;
+LastDelimiterWasOpen = false;
 //
 // ResultsMap structure used for most function interfaces
 ResultsMap = Map();
@@ -93,7 +93,7 @@ for each index i in counter
 	}
 	LastDelimiterWasOpen=(BlockProcess<3);
 	ResultsMap.put("bp",BlockProcess)
-	ResultsMap=standalone.PreprocessBlock(ResultsMap).toMap();
+	ResultsMap=standalone.ProcessBlock(ResultsMap).toMap();
 	if(TextCursor > End)
 	{
 		// we're done
