@@ -7,18 +7,21 @@ string standalone.fmfunc_IF(bool isPRE, string strResultsMap)
 //
 // TEST
 //
-// ResultsMap structure used for most function interfaces
+// // ResultsMap structure used for most function interfaces
 // ResultsMap = Map();
-// ResultsMap.put("ind",null); // CurrentIndex
-// ResultsMap.put("od",OpenDelimiter); 
-// ResultsMap.put("cd",CloseDelimiter);
-// ResultsMap.put("fc",FunctionCharacter);
-// ResultsMap.put("o_loc",-1); // OpenDelimiterLocation
-// ResultsMap.put("c_loc",-1); // ClosedDelimiterLocation
-// ResultsMap.put("txt",MergeText);
-// ResultsMap.put("end",End);
-// ResultsMap.put("curs",0) // TextCursor
-// ResultsMap.put("chunk",""); // CurrentChunk
+// ResultsMap.put("txt",MergeText); 				// doesn't change, string
+// ResultsMap.put("data",Data);					// All the data
+// ResultsMap.put("od",OpenDelimiter); 			// doesn't change, single character
+// ResultsMap.put("cd",CloseDelimiter); 			// doesn't change, single character
+// ResultsMap.put("fc",FunctionCharacter); 		// doesn't change, single character
+// ResultsMap.put("end",MergeText.len() - 1); 		// End position, doesn't change, integer
+// // these change on each parse cycle below:
+// ResultsMap.put("o_loc",-1); 					// OpenDelimiterLocation integer
+// ResultsMap.put("c_loc",-1); 					// ClosedDelimiterLocation integer
+// ResultsMap.put("curs",0) 						// TextCursor integer
+// ResultsMap.put("chunk","");						// CurrentChunk string
+// ResultsMap.put("bp",0);							// BlockProcess integer
+// ResultsMap.put("ind",null);						// CurrentIndex
 //
 // ERROR CHECKS
 if(isblank(strIndex))

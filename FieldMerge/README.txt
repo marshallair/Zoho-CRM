@@ -104,7 +104,24 @@ FieldMerge() OPERATION
     The root index in the block map for ResultsMap is [0] (as opposed to what it contains, such as {[0,1],[0,2]...[0,n]}). When processing is finished, the only key-value left should be
     ResultsMap.get([0]) and therefore this is what is used to return the value of FieldMap() upon completion, barring errors being passed back.
 
-    Because escaping of the block delimiters and field characters are allowed, there is a function to handle this, too, EscapeCharacters().
+    Because escaping of the block delimiters and field characters are allowed, there is a function to handle this, too, EscapeCharacters(). In addition to the indices for ResultsMap, the
+    following keys are used to pass values to and from ProcessBlock() and the fmfunc_ functions:
+
+        // // ResultsMap structure used for most function interfaces
+        // ResultsMap = Map();
+        // ResultsMap.put("txt",MergeText); 				// doesn't change, string
+        // ResultsMap.put("data",Data);					// All the data
+        // ResultsMap.put("od",OpenDelimiter); 			// doesn't change, single character
+        // ResultsMap.put("cd",CloseDelimiter); 			// doesn't change, single character
+        // ResultsMap.put("fc",FunctionCharacter); 		// doesn't change, single character
+        // ResultsMap.put("end",MergeText.len() - 1); 		// End position, doesn't change, integer
+        // // these change on each parse cycle below:
+        // ResultsMap.put("o_loc",-1); 					// OpenDelimiterLocation integer
+        // ResultsMap.put("c_loc",-1); 					// ClosedDelimiterLocation integer
+        // ResultsMap.put("curs",0) 						// TextCursor integer
+        // ResultsMap.put("chunk","");						// CurrentChunk string
+        // ResultsMap.put("bp",0);							// BlockProcess integer
+        // ResultsMap.put("ind",null);						// CurrentIndex
 
     Within FieldMerge(), there is a container function, ProcessBlock(), which can be modified to call "fmfunc_" functions (see below) to implement new
     functions or arguments and expand the abilities of FieldMerge. ProcessBlock() calls these fmfunc_ functions (see below) to create
