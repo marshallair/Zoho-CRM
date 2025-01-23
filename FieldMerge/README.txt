@@ -25,7 +25,7 @@ FieldMerge() BLOCKS
         Embedded or sequential blocks:        Level0Text {Level1Text {Level2SequentialText }{MoreLevel2SequentialText }{{Level3Text}}}. => "Level0Text Level1Text Level2SequentialText MoreLevel2SequentialText Level3Text."
         
     Between the ability to nest blocks, and use functions, any output can be achieved, including JSON, HTML, or Rich Text.
-
+w
 FieldMerge() FUNCTIONS
 
     Details of functions and their parameters are found in addendum A.
