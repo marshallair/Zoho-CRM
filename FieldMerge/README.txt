@@ -19,8 +19,8 @@ FieldMerge() BLOCKS
 
     A block is a chuck of text that is treated as identifiably separate from the surrounding MergeText information.
     Blocks can contain anything. Examples:
-        String text:                          {Hello world!} => "Hellow World!"
-        Functions to retrieve field data:     ${firstname} or $F${firstname} or {{firstname}} => "Jerry"
+        String text:                          {Hello world!} => "Hello World!"
+        Functions to retrieve field data:     ${firstname} or $F${firstname}te => "Jerry"
         Function Arguments and operators:     $IF${{${Dept}==Sales}${{Revenue}{{$N}: {$}}}{Not in sales department.}} => "Sales: $25,000"  -OR-  =>"Not in sales department."
         Embedded or sequential blocks:        Level0Text {Level1Text {Level2SequentialText }{MoreLevel2SequentialText }{{Level3Text}}}. => "Level0Text Level1Text Level2SequentialText MoreLevel2SequentialText Level3Text."
         
