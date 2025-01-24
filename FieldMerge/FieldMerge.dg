@@ -17,10 +17,10 @@ string standalone.FieldMerge(String MergeText,String Data,String OpenDelimiter,S
 //  MergeText = "Marsh\\}all {Henley {is {the }}{b{e}{s}{t} }\\$}{man\\{ }at my {wedding}.";
 //	MergeText = "Marshall Henley {is the }{best}";
 //
-// TRIVIAL CASE:
-if(MergeText=="")
+// TRIVIAL CASES:
+if(isBlank(MergeText)||!MergeText.contains("{"))
 {
-	return "";
+	return MergeText;
 }
 // DEFAULTS:
 if(OpenDelimiter == "")

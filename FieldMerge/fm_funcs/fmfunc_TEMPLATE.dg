@@ -1,7 +1,7 @@
-string standalone.fmfunc_TEMPLATE(bool isPRE, string strResultsMap)
+string standalone.fmfunc_TEMPLATE(string strResultsMap)
 {
 // USAGE
-//  standalone.fmfunc_TEMPLATE(strIndex)
+//  standalone.fmfunc_TEMPLATE(strResultsMap)
 //
 // NOTES
 //
@@ -80,18 +80,16 @@ string standalone.fmfunc_TEMPLATE(bool isPRE, string strResultsMap)
 // 		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
 // 	}
 // 	//
-
-if(isblank(strIndex))
+// ERROR
+if(isEmpty(strResultsMap))
 {
-	return "";
+	return "ERROR: string passed to an fmfunc is empty.";
 }
 //
-// DEFAULTS
-//
 // VARIABLES
-i = strIndex.toList();
-m = Map();
+ResultsMap=strResultsMap.toMap();
+isPRE=(ResultsMap.get("bp")<3);
 //
 // FUNCTION
-return m;
+return ResultsMap;
 }

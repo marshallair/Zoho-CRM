@@ -61,22 +61,22 @@ else
 // IF function
 if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"IF"+FunctionCharacter))
 {
-	ResultsMap=standalone.fmfunc_IF(true,ResultsMap).toMap();
+	ResultsMap=standalone.fmfunc_IF(ResultsMap).toMap();
 }
 // AND function
 else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"AND"+FunctionCharacter))
 {
-	ResultsMap=standalone.fmfunc_AND(true,ResultsMap).toMap();
+	ResultsMap=standalone.fmfunc_AND(ResultsMap).toMap();
 }
 else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"NAND"+FunctionCharacter))
 // NAND function
 {
-	ResultsMap=standalone.fmfunc_NAND(true,ResultsMap).toMap();
+	ResultsMap=standalone.fmfunc_NAND(ResultsMap).toMap();
 }
 // FIELD function - this must come second to last due to looking for a single FunctionCharacter (short version) that is not part of another function
 else if( (ResultsMap.get("chunk").endsWith(FunctionCharacter+"F"+FunctionCharacter)) || (ResultsMap.get("chunk").endsWith(FunctionCharacter)) )
 {
-	ResultsMap.putAll(standalone.fmfunc_FIELD(true,ResultsMap).toMap();
+	ResultsMap.putAll(standalone.fmfunc_FIELD(ResultsMap).toMap();
 }
 // plain "container" blocks last
 else
