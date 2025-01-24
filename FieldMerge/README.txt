@@ -181,7 +181,7 @@ ProcessBlock()
         with its return value, and the process continues.
 
 fmfnc_ FUNCTIONS
-    fmfunc_ functions are concerned with:
+    fmfunc_ functions are concerned with (based on whether preprocessing or post processing based on isPRE boolean):
     - If IsPRE is true, loading ResultsMap with key-maps to be processed later in post processing, checking first to see if
         they already exist (in the case of an argument, to a function, for example).
     - If IsPRE is false, processing the block just completed with the information as defined in it's block text, and collapsing/

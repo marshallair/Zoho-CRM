@@ -42,19 +42,17 @@ EndSequentialBlock = 3;
 EndEmbeddedBlock = 4;
 //
 // Process block next step based on what was found
-if(BlockProcess < 3)
+isPRE=(BlockProcess<3)
+if(isPRE)
 {
 	// store the chunk
 	ResultsMap.put("chunk",ResultsMap.get("text").mid(ResultsMap("curs"),ResultsMap("o_loc")-1));
 	// update cursor
-	e.put("curs",ResultsMap.get("curs") + ResultsMap.get("o_loc") + 1);
 }
 else
 {
 	// store the chunk
 	ResultsMap.put("chunk",ResultsMap.get("text").mid(ResultsMap("curs"),ResultsMap("c_loc")-1));
-	// update cursor
-	ResultsMap.put("curs",ResultsMap.get("curs") + ResultsMap.get("c_loc") + 1);
 }
 //
 // Every function and operator is evaluated. To add new operators or functions, add them here, minding their order if necessary, and call their associated standalone function.
@@ -78,11 +76,46 @@ else if( (ResultsMap.get("chunk").endsWith(FunctionCharacter+"F"+FunctionCharact
 {
 	ResultsMap.putAll(standalone.fmfunc_FIELD(ResultsMap).toMap();
 }
-// plain "container" blocks last
+// plain "container" blocks go last last - no fmfunc needed..
 else
 {
-// NEED TO PROCESS HERE - NO NEED FOR STANDALONE FUNCTION I THINK
+	CurrentIndex=ResultsMap.get("ind").toList(",");
+	if(ResultsMap.get("bp")==NewEmbeddedBlock)
+	{
+		CurrentIndex.add(0);
+		if(ResultsMap.containKey(CurrentIndex.duplicate().toList()))
+		{
+			ResultsMap.put(CurrentIndex,"BLOCK");
+		}
+	}
+	else if(ResultsMap.get("bp")==NewSequentialBlock)
+	{
+		CurrentIndex=standalone.IncrementSequentialIndex(CurrentIndex.duplicate().toList()).toList(",");
+		if(ResultsMap.containKey(CurrentIndex.duplicate().toList()))
+		{
+			ResultsMap.put(CurrentIndex,"BLOCK");
+		}
+	}
+	else if(ResultsMap.get("bp")==EndSequentialBlock)
+	{
+		XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	}
+	else
+	{
+		// EndEmbeddedBlock
+	}
 }
+//
+// Update cursor
+if(ResultsMapts.get("bp")<3)
+{
+	ResultsMap.put("curs",ResultsMap.get("curs") + ResultsMap.get("o_loc") + 1);
+}
+else
+{
+	ResultsMap.put("curs",ResultsMap.get("curs") + ResultsMap.get("c_loc") + 1);
+}
+
 
 return ResultsMap;
 }
