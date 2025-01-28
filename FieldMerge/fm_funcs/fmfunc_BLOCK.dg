@@ -1,0 +1,109 @@
+string standalone.fmfunc_BLOCK(string strResultsMap)
+{
+// USAGE
+//  standalone.fmfunc_TEMPLATE(strResultsMap)
+//
+// NOTES
+//
+// TEST
+//
+// // ResultsMap structure used for most function interfaces
+// ResultsMap = Map();
+// ResultsMap.put("txt",MergeText); 				// doesn't change, string
+// ResultsMap.put("data",Data);					// All the data
+// ResultsMap.put("od",OpenDelimiter); 			// doesn't change, single character
+// ResultsMap.put("cd",CloseDelimiter); 			// doesn't change, single character
+// ResultsMap.put("fc",FunctionCharacter); 		// doesn't change, single character
+// ResultsMap.put("end",MergeText.len() - 1); 		// End position, doesn't change, integer
+// // these change on each parse cycle below:
+// ResultsMap.put("o_loc",-1); 					// OpenDelimiterLocation integer
+// ResultsMap.put("c_loc",-1); 					// ClosedDelimiterLocation integer
+// ResultsMap.put("curs",0) 						// TextCursor integer
+// ResultsMap.put("chunk","");						// CurrentChunk string
+// ResultsMap.put("bp",0);							// BlockProcess integer
+// ResultsMap.put("ind",null);						// CurrentIndex
+//
+// ERROR CHECKS
+
+
+	// if(OpenDelimiterLocation > 0)
+	// {
+	// 	// there is some preceding text - treat as a completed Sblock preceding current Sblock
+	// 	CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+	// 	ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,OpenDelimiterLocation + TextCursor));
+	// }
+	// TextCursor = TextCursor + OpenDelimiterLocation + 1;
+	// CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+	// // Add preprocess key-value pairs to map
+	// ResultsMap.putAll(standalone.PreprocessBlock(MergeText,CurrentIndex,TextCursor-1,OpenDelimiter,CloseDelimiter,FunctionCharacter).toMap());
+	// LastDelimiterWasOpen = true;
+
+
+	//
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// Check for preceding text
+// if(OpenDelimiterLocation > 0)
+// 	{
+// 		ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor, OpenDelimiterLocation + TextCursor));
+// 		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList(",");
+// 	}
+// 	//
+// ERROR
+if(isEmpty(strResultsMap))
+{
+	return "ERROR: string passed to an fmfunc is empty.";
+}
+//
+// VARIABLES
+ResultsMap=strResultsMap.toMap();
+BlockProcess=ResultsMap.get("bp");
+CurrentIndex=ResultsMap.get("ind");
+//
+// // Process
+if(BlockProcess==NewEmbeddedBlock)
+{
+	CurrentIndex.add(0);
+	ResultsMap.put(CurrentIndex,"BLOCK");
+}
+else if(BlockProcess)==NewSequentialBlock)
+{
+	CurrentIndex=standalone.IncrementSequentialIndex(CurrentIndex.duplicate().toList()).toList(",");
+	ResultsMap.put(CurrentIndex,"BLOCK");
+}
+else if(BlockProcess == EndSequentialBlock)
+{
+	ResultsMap.putAll(standalone.PostprocessBlock(ResultsMap,CurrentIndex).toMap());
+	TextCursor = TextCursor + ClosedDelimiterLocation + 1;
+	LastDelimiterWasOpen = false;
+}
+else if(BlockProcess == EndEmbeddedBlock)
+{
+	// Complete Embedded blocks - process what is in CurrentIndex.get( CurrentIndex.size()-1 - (CurrentIndex.get(CurrentIndex.size()-1) ), the previous dimension
+	if(ClosedDelimiterLocation > 0)
+	{
+		// there is some ending text - treat as a completed Sblock preceding current Sblock
+		CurrentIndex = standalone.IncrementSequentialIndex(CurrentIndex).toList();
+		ResultsMap.put(CurrentIndex.duplicate(0).toList(),MergeText.mid(TextCursor,ClosedDelimiterLocation + TextCursor));
+	}
+	ParentBlockKey = standalone.ParentBlockKey(ResultsMap).toList(",");
+	BlockType = standalone.ParentBlockValue(ResultsMap);
+	Indices = standalone.ParentSubIndices(ResultsMap).toList("|");
+	if(BlockType = "BLOCK")
+	{
+		ResultsMap.put(ParentBlockKey.duplicate().toList(),"");
+		// iterate through concatenation of each sub block
+		for each  x in Indices
+		{
+			ResultsMap.put(ParentBlockKey.toList(),ResultsMap.get(ParentBlockKey.toList()) + ResultsMap.get(x.toList()));
+			ResultsMap.remove(x.toList());
+		}
+		// Reset CurrentIndex to "last item" which is now the parent
+		CurrentIndex = ParentBlockKey;
+	}
+	TextCursor = TextCursor + ClosedDelimiterLocation + 1;
+	LastDelimiterWasOpen = false;
+}
+//
+// FUNCTION
+return ResultsMap;
+}

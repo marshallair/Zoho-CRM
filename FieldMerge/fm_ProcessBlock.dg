@@ -55,67 +55,68 @@ else
 	ResultsMap.put("chunk",ResultsMap.get("text").mid(ResultsMap("curs"),ResultsMap("c_loc")-1));
 }
 //
-// Every function and operator is evaluated. To add new operators or functions, add them here, minding their order if necessary, and call their associated standalone function.
-// IF function
-if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"IF"+FunctionCharacter))
+if(isPRE)
 {
-	ResultsMap=standalone.fmfunc_IF(ResultsMap).toMap();
-}
-// AND function
-else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"AND"+FunctionCharacter))
-{
-	ResultsMap=standalone.fmfunc_AND(ResultsMap).toMap();
-}
-else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"NAND"+FunctionCharacter))
-// NAND function
-{
-	ResultsMap=standalone.fmfunc_NAND(ResultsMap).toMap();
-}
-// FIELD function - this must come second to last due to looking for a single FunctionCharacter (short version) that is not part of another function
-else if( (ResultsMap.get("chunk").endsWith(FunctionCharacter+"F"+FunctionCharacter)) || (ResultsMap.get("chunk").endsWith(FunctionCharacter)) )
-{
-	ResultsMap.putAll(standalone.fmfunc_FIELD(ResultsMap).toMap();
-}
-// plain "container" blocks go last last - no fmfunc needed..
-else
-{
-	CurrentIndex=ResultsMap.get("ind").toList(",");
-	if(ResultsMap.get("bp")==NewEmbeddedBlock)
+	// Every function and operator is evaluated. To add new operators or functions, add them here, minding their order if necessary, and call their associated standalone function.
+	// IF function
+	if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"IF"+FunctionCharacter) || ResultsMap.get(CurrentIndex.to).startswith("IF_"))
 	{
-		CurrentIndex.add(0);
-		if(ResultsMap.containKey(CurrentIndex.duplicate().toList()))
-		{
-			ResultsMap.put(CurrentIndex,"BLOCK");
-		}
+		ResultsMap=standalone.fmfunc_IF(ResultsMap).toMap();
 	}
-	else if(ResultsMap.get("bp")==NewSequentialBlock)
+	// AND function
+	else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"AND"+FunctionCharacter))
 	{
-		CurrentIndex=standalone.IncrementSequentialIndex(CurrentIndex.duplicate().toList()).toList(",");
-		if(ResultsMap.containKey(CurrentIndex.duplicate().toList()))
-		{
-			ResultsMap.put(CurrentIndex,"BLOCK");
-		}
+		ResultsMap=standalone.fmfunc_AND(ResultsMap).toMap();
 	}
-	else if(ResultsMap.get("bp")==EndSequentialBlock)
+	else if(ResultsMap.get("chunk").endsWith(FunctionCharacter+"NAND"+FunctionCharacter))
+	// NAND function
 	{
-		XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+		ResultsMap=standalone.fmfunc_NAND(ResultsMap).toMap();
 	}
+	// FIELD function - this must come second to last due to looking for a single FunctionCharacter (short version) that is not part of another function
+	else if( (ResultsMap.get("chunk").endsWith(FunctionCharacter+"F"+FunctionCharacter)) || (ResultsMap.get("chunk").endsWith(FunctionCharacter)) )
+	{
+		ResultsMap.putAll(standalone.fmfunc_FIELD(ResultsMap).toMap();
+	}
+	// BLOCK container: plain "container" blocks go last last
 	else
 	{
-		// EndEmbeddedBlock
+		CurrentIndex=ResultsMap.get("ind").toList(",");
 	}
-}
-//
-// Update cursor
-if(ResultsMapts.get("bp")<3)
-{
+	//
+	// Update cursor
 	ResultsMap.put("curs",ResultsMap.get("curs") + ResultsMap.get("o_loc") + 1);
 }
-else
+else // not isPRE
 {
+	// IF function and arguments
+	if(ResultsMap.get(CurrentIndex).startswith("IF_"))
+	{
+		ResultsMap=standalone.fmfunc_IF(ResultsMap).toMap();
+	}
+	// AND function
+	else if(ResultsMap.get(CurrentIndex).startswith("AND_"))
+	{
+		ResultsMap=standalone.fmfunc_AND(ResultsMap).toMap();
+	}
+	else if(ResultsMap.get(CurrentIndex).startswith("NAND_"))
+	// NAND function
+	{
+		ResultsMap=standalone.fmfunc_NAND(ResultsMap).toMap();
+	}
+	// FIELD function - this must come second to last due to looking for a single FunctionCharacter (short version) that is not part of another function
+	else if(ResultsMap.get(CurrentIndex).startswith("FIELD_"))
+	{
+		ResultsMap.putAll(standalone.fmfunc_FIELD(ResultsMap).toMap();
+	}
+	// BLOCK container: plain "container" blocks go last last
+	if(ResultsMap.get(CurrentIndex)=="BLOCK")
+	{
+		CurrentIndex=ResultsMap.get("ind").toList(",");
+	}
+	//
+	// Update cursor
 	ResultsMap.put("curs",ResultsMap.get("curs") + ResultsMap.get("c_loc") + 1);
 }
-
-
 return ResultsMap;
 }
