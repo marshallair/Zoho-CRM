@@ -91,5 +91,6 @@ string standalone.fmfunc_IF(string strResultsMap)
 	isPRE=(ResultsMap.get("bp")<3);
 	//
 	// FUNCTION
+	
 	return ResultsMap;
 	}
